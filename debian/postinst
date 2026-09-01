@@ -240,7 +240,6 @@ LIMITS
       cp /usr/share/rivolution/systemd/pipewire-system.service /etc/systemd/system/
       cp /usr/share/rivolution/systemd/wireplumber-system.service /etc/systemd/system/
       cp /usr/share/rivolution/systemd/stereo-tool.service /etc/systemd/system/
-      cp /usr/share/rivolution/systemd/rivapi.service /etc/systemd/system/
       cp /usr/share/rivolution/systemd/rivendell.service.d/rivolution.conf /etc/systemd/system/rivendell.service.d/
       cp /usr/share/rivolution/systemd/icecast2.service.d/rivolution.conf /etc/systemd/system/icecast2.service.d/
 
@@ -254,9 +253,6 @@ LIMITS
       rm -f /etc/systemd/system/liquidsoap.service
       rm -rf /etc/systemd/system/liquidsoap.service.d
 
-      cp /usr/share/rivolution/sudoers.d/rivapi /etc/sudoers.d/rivapi
-      chmod 440 /etc/sudoers.d/rivapi
-
       cp /usr/share/rivolution/udev/99-ptp.rules /etc/udev/rules.d/
       udevadm control --reload-rules
       udevadm trigger
@@ -267,7 +263,6 @@ LIMITS
       # needs the socket present at startup, not just eventually), so
       # these two start ahead of the rivendell restart below.
       systemctl enable --now pipewire-system.service wireplumber-system.service
-      systemctl enable --now rivapi.service
       systemctl enable rivolution-stack.target
 
       /bin/systemctl restart rivendell

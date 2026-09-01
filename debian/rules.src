@@ -22,7 +22,6 @@ build:
 	dh_autoreconf
 	 CFLAGS="$$(dpkg-buildflags --get CFLAGS) $(ARCH_CAP)" CXXFLAGS="$$(dpkg-buildflags --get CXXFLAGS) $(ARCH_CAP)" LDFLAGS="$$(dpkg-buildflags --get LDFLAGS) $(ARCH_CAP)" ./configure --prefix=/usr --libdir=/usr/lib --libexecdir=/var/www/rd-bin --sysconfdir=/etc/apache2/conf-available MUSICBRAINZ_LIBS="-ldiscid -lmusicbrainz5cc -lcoverartcc"
 	make $(DEBUILD_MAKE_ARGS)
-	cd rivapi && go build -o rivapi .
 
 # dpkg (since 1.16.2, mandatory since 1.22.7) calls build-arch/binary-arch
 # rather than falling back to build/binary -- all packages here are
@@ -215,18 +214,15 @@ binary-arch: build-arch
 # install time rather than these being dpkg-owned conffiles directly.
 #
 	mkdir -p debian/rivolution/usr/bin
-	cp rivapi/rivapi debian/rivolution/usr/bin/rivapi
 	mkdir -p debian/rivolution/usr/share/rivolution/systemd/rivendell.service.d
 	mkdir -p debian/rivolution/usr/share/rivolution/systemd/icecast2.service.d
 	cp conf/systemd/rivolution-stack.target debian/rivolution/usr/share/rivolution/systemd/
 	cp conf/systemd/pipewire-system.service debian/rivolution/usr/share/rivolution/systemd/
 	cp conf/systemd/wireplumber-system.service debian/rivolution/usr/share/rivolution/systemd/
 	cp conf/systemd/stereo-tool.service debian/rivolution/usr/share/rivolution/systemd/
-	cp conf/systemd/rivapi.service debian/rivolution/usr/share/rivolution/systemd/
 	cp conf/systemd/rivendell.service.d/rivolution.conf debian/rivolution/usr/share/rivolution/systemd/rivendell.service.d/
 	cp conf/systemd/icecast2.service.d/rivolution.conf debian/rivolution/usr/share/rivolution/systemd/icecast2.service.d/
 	mkdir -p debian/rivolution/usr/share/rivolution/sudoers.d
-	cp conf/sudoers.d/rivapi debian/rivolution/usr/share/rivolution/sudoers.d/
 	mkdir -p debian/rivolution/usr/share/rivolution/udev
 	cp conf/udev/99-ptp.rules debian/rivolution/usr/share/rivolution/udev/
 	mkdir -p debian/rivolution/usr/share/rivolution/alsa
@@ -245,7 +241,7 @@ binary-arch: build-arch
 # it aborts the entire batch of every binary in the package. Excluding
 # it is the documented fix (dh_dwz(1) -X); dh_strip below still handles
 # rivapi normally afterward.
-	dh_dwz -Xrivapi
+	dh_dwz
 	dh_strip
 	dh_makeshlibs
 # caed/ripcd link against pipewire-jack's libjack.so.0 shim (the

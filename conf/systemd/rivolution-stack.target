@@ -17,7 +17,6 @@ Wants=wireplumber-system.service
 Wants=rivendell.service
 Wants=icecast2.service
 Wants=stereo-tool.service
-Wants=tailscaled.service
 
 [Install]
 WantedBy=multi-user.target
