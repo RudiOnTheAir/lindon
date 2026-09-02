@@ -148,6 +148,21 @@ function SetupNfsServer {
     read RD_NFS_CLIENTS
     RD_NFS_CLIENTS=${RD_NFS_CLIENTS:-*}
 
+    # postinst already creates 'rduser'@'%' (wildcard-host grant) in the
+    # database itself on fresh install -- but that alone isn't enough:
+    # MariaDB's own bind-address defaults to 127.0.0.1 (localhost only)
+    # on Ubuntu regardless of what's granted inside the database, so a
+    # remote client would otherwise get "connection refused" before it
+    # ever reaches the point where credentials even matter.
+    mariadb_cnf=/etc/mysql/mariadb.conf.d/50-server.cnf
+    if test -f "$mariadb_cnf" ; then
+        if grep -q '^bind-address\s*=\s*127.0.0.1' "$mariadb_cnf" ; then
+            sed -i 's/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/' "$mariadb_cnf"
+            systemctl restart mariadb
+            echo "MariaDB now listening on all interfaces (was 127.0.0.1-only)."
+        fi
+    fi
+
     apt -y install nfs-kernel-server
 
     mkdir -p /home/rd/import /home/rd/share
