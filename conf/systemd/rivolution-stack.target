@@ -12,8 +12,6 @@
 
 [Unit]
 Description=Rivolution Broadcast Stack
-Wants=pipewire-system.service
-Wants=wireplumber-system.service
 Wants=rivendell.service
 Wants=icecast2.service
 Wants=stereo-tool.service

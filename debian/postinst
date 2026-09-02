@@ -237,8 +237,6 @@ LIMITS
       mkdir -p /etc/systemd/system/rivendell.service.d
       mkdir -p /etc/systemd/system/icecast2.service.d
       cp /usr/share/rivolution/systemd/rivolution-stack.target /etc/systemd/system/
-      cp /usr/share/rivolution/systemd/pipewire-system.service /etc/systemd/system/
-      cp /usr/share/rivolution/systemd/wireplumber-system.service /etc/systemd/system/
       cp /usr/share/rivolution/systemd/stereo-tool.service /etc/systemd/system/
       cp /usr/share/rivolution/systemd/rivendell.service.d/rivolution.conf /etc/systemd/system/rivendell.service.d/
       cp /usr/share/rivolution/systemd/icecast2.service.d/rivolution.conf /etc/systemd/system/icecast2.service.d/
@@ -259,10 +257,11 @@ LIMITS
 
       systemctl daemon-reload
 
-      # PipeWire must be up before rivendell.service (caed's JACK driver
-      # needs the socket present at startup, not just eventually), so
-      # these two start ahead of the rivendell restart below.
-      systemctl enable --now pipewire-system.service wireplumber-system.service
+      # PipeWire itself is user-scope here (see rivendell.service.d/
+      # rivolution.conf), started automatically as part of the operator's
+      # desktop session (autologin) rather than as a system-scope unit --
+      # rivendell.service is bound to that user session's user@<uid>.service
+      # via the drop-in, so ordering is enforced there, not here.
       systemctl enable rivolution-stack.target
 
       /bin/systemctl restart rivendell
