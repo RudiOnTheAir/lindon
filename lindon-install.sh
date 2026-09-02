@@ -131,22 +131,48 @@ function InstallPackages {
 
 # ---------------------------------------------------------------------
 # Step 4a: NFS export (server role)
+#
+# Follows Rivolution's own (proven) pattern: real directories are
+# bind-mounted under /srv/nfs4/... and exported *from there*, not
+# exported directly. /var/snd itself is the one path lindon actually
+# needs to be present the instant the service starts, so it's handled
+# separately from the on-demand autofs-managed exchange folders below.
 # ---------------------------------------------------------------------
 function SetupNfsServer {
     echo
     echo "Setting up NFS exports (rw) for:"
-    echo "  /var/snd"
-    echo "  /home/rd/import"
-    echo "  /home/rd/share"
+    echo "  /var/snd            -> /srv/nfs4/var/snd"
+    echo "  /home/rd/import     -> /srv/nfs4/home/rd/import"
+    echo "  /home/rd/share      -> /srv/nfs4/home/rd/share"
     echo -n "Enter the client subnet/host allowed to mount these [*]: "
     read RD_NFS_CLIENTS
     RD_NFS_CLIENTS=${RD_NFS_CLIENTS:-*}
 
     apt -y install nfs-kernel-server
+
     mkdir -p /home/rd/import /home/rd/share
     chown rd:rd /home/rd/import /home/rd/share
 
-    for d in /var/snd /home/rd/import /home/rd/share ; do
+    mkdir -p /srv/nfs4/var/snd /srv/nfs4/home/rd/import /srv/nfs4/home/rd/share
+
+    # Bind mounts: real path -> pseudo-fs export point. Idempotent --
+    # skip any pair already bind-mounted, and only append an /etc/fstab
+    # line (for reboot persistence) if one isn't already there.
+    declare -A binds=(
+        [/var/snd]=/srv/nfs4/var/snd
+        [/home/rd/import]=/srv/nfs4/home/rd/import
+        [/home/rd/share]=/srv/nfs4/home/rd/share
+    )
+    for real in "${!binds[@]}" ; do
+        pseudo=${binds[$real]}
+        if ! findmnt "$pseudo" >/dev/null 2>&1 ; then
+            mount --bind "$real" "$pseudo"
+        fi
+        line="$real $pseudo none bind 0 0"
+        grep -qF "$pseudo " /etc/fstab 2>/dev/null || echo "$line" >> /etc/fstab
+    done
+
+    for d in /srv/nfs4/var/snd /srv/nfs4/home/rd/import /srv/nfs4/home/rd/share ; do
         line="$d $RD_NFS_CLIENTS(rw,sync,no_subtree_check,no_root_squash)"
         grep -qF "$d " /etc/exports 2>/dev/null || echo "$line" >> /etc/exports
     done
@@ -157,22 +183,57 @@ function SetupNfsServer {
 
 # ---------------------------------------------------------------------
 # Step 4b: NFS mount + remote DB pointer (client role)
+#
+# /var/snd: mounted immediately (needed right away) plus a persistent
+# fstab entry for reboot -- matches Rivolution's own approach, no
+# autofs involved for this one path.
+#
+# import/share: autofs, on-demand -- these are occasional-use
+# exchange folders, not something rivendell.service needs present
+# the instant it starts, so lazy-mounting them is fine and avoids an
+# unnecessary boot-time NFS dependency for something rarely touched.
 # ---------------------------------------------------------------------
 function SetupNfsClient {
     echo
     echo -n "Enter the IP address of the lindon server (NFS + database): "
     read RD_SERVER
 
-    echo "Mounting /var/snd, /home/rd/import, /home/rd/share from $RD_SERVER ..."
-    apt -y install nfs-common
-    mkdir -p /home/rd/import /home/rd/share
-    chown rd:rd /home/rd/import /home/rd/share
+    apt -y install nfs-common autofs
 
-    for d in /var/snd /home/rd/import /home/rd/share ; do
-        line="$RD_SERVER:$d $d nfs rw,_netdev 0 0"
-        grep -qF "$RD_SERVER:$d " /etc/fstab 2>/dev/null || echo "$line" >> /etc/fstab
+    # --- /var/snd: direct mount now + persistent fstab entry ---
+    mkdir -p /var/snd
+    src="$RD_SERVER:/srv/nfs4/var/snd"
+    if [ "$(findmnt -no SOURCE /var/snd 2>/dev/null)" != "$src" ] ; then
+        mountpoint -q /var/snd && umount /var/snd
+        mount -t nfs4 "$src" /var/snd
+    fi
+    fstab_line="$src /var/snd nfs4 rw,x-systemd.after=network-online.target 0 0"
+    grep -qF "$src " /etc/fstab 2>/dev/null || echo "$fstab_line" >> /etc/fstab
+
+    # --- import/share: autofs, on-demand via /misc/, symlinked into
+    #     /home/rd for convenience ---
+    mkdir -p /home/rd
+    {
+        echo "import -fstype=nfs4,rw $RD_SERVER:/srv/nfs4/home/rd/import"
+        echo "share  -fstype=nfs4,rw $RD_SERVER:/srv/nfs4/home/rd/share"
+    } > /etc/auto.rd.audiostore
+
+    master_line="/misc /etc/auto.rd.audiostore"
+    grep -qF "$master_line" /etc/auto.master 2>/dev/null || echo "$master_line" >> /etc/auto.master
+
+    mkdir -p /misc
+    systemctl enable --now autofs
+    systemctl restart autofs
+
+    for d in import share ; do
+        dest="/home/rd/$d"
+        src_link="/misc/$d"
+        if [ "$(readlink "$dest" 2>/dev/null)" != "$src_link" ] ; then
+            rm -rf "$dest"
+            ln -s "$src_link" "$dest"
+        fi
     done
-    mount -a
+    chown -h rd:rd /home/rd/import /home/rd/share
 
     echo
     echo "Now pointing this machine's database connection at $RD_SERVER."
