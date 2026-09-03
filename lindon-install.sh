@@ -95,8 +95,24 @@ GDM
     elif systemctl list-unit-files 2>/dev/null | grep -q '^sddm\.service' ; then
         echo "Detected SDDM (KDE Plasma) -- configuring autologin for rd."
         mkdir -p /etc/sddm.conf.d
-        session=$(find /usr/share/xsessions /usr/share/wayland-sessions \
+
+        # Kubuntu 26.04 no longer installs plasma-session-x11 by default
+        # (Wayland-only out of the box) -- install it unconditionally so
+        # X11 is available as an option even if Wayland ends up being what
+        # actually gets used. Worth having: SPICE (used for remote console
+        # access to these VMs) has known clipboard/resize/stability issues
+        # under Wayland that don't reproduce under X11 in testing so far.
+        if [ ! -d /usr/share/xsessions ] || ! find /usr/share/xsessions -iname '*plasma*' -print -quit 2>/dev/null | grep -q . ; then
+            apt -y install plasma-session-x11
+        fi
+
+        # X11 first, Wayland as fallback.
+        session=$(find /usr/share/xsessions \
             -iname '*plasma*' 2>/dev/null | head -1 | xargs -r basename -s .desktop)
+        if [ -z "$session" ] ; then
+            session=$(find /usr/share/wayland-sessions \
+                -iname '*plasma*' 2>/dev/null | head -1 | xargs -r basename -s .desktop)
+        fi
         session=${session:-plasma}
         cat > /etc/sddm.conf.d/lindon-autologin.conf <<SDDM
 [Autologin]
