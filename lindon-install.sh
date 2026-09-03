@@ -126,11 +126,30 @@ GDM
                 -iname '*plasma*' 2>/dev/null | head -1 | xargs -r basename -s .desktop)
         fi
         session=${session:-plasma}
-        cat > /etc/sddm.conf.d/lindon-autologin.conf <<SDDM
+
+        # Kubuntu's own 20-kubuntu.conf already ships an [Autologin]
+        # section (Session=plasma, empty User=) -- a second, separate
+        # file competing for the same section didn't reliably win
+        # (SDDM's actual multi-file conf.d precedence for this turned
+        # out not to match the "later filename wins" assumption tested
+        # on lindon-client: our file was last alphabetically and still
+        # lost). Editing whichever existing file already defines
+        # [Autologin] in place sidesteps the precedence question
+        # entirely, rather than gambling on load order a second time.
+        existing_file=$(grep -l '^\[Autologin\]' /etc/sddm.conf.d/*.conf 2>/dev/null | head -1)
+        if [ -n "$existing_file" ] ; then
+            sed -i '/^\[Autologin\]/,/^\[/{
+                /^User=/d
+                /^Session=/d
+            }' "$existing_file"
+            sed -i "/^\[Autologin\]/a User=rd\nSession=$session" "$existing_file"
+        else
+            cat > /etc/sddm.conf.d/lindon-autologin.conf <<SDDM
 [Autologin]
 User=rd
 Session=$session
 SDDM
+        fi
         AUTOLOGIN_CONFIGURED=1
 
     else
