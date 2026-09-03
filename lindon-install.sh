@@ -235,6 +235,17 @@ function SetupNfsServer {
     read RD_NFS_CLIENTS
     RD_NFS_CLIENTS=${RD_NFS_CLIENTS:-*}
 
+    # postinst sets /var/snd to rd:rivendell 775 at install time -- but
+    # if an operator later mounts a separate, larger disk over /var/snd
+    # (a fresh ext4 filesystem's root defaults to root:root 755), that
+    # silently reverts it, breaking writes (imports, etc.) for anyone
+    # not root, with no obvious error pointing at ownership as the
+    # cause. Found the hard way on lindon-server after exactly that.
+    # Cheap to just always re-assert this rather than assume it's still
+    # correct.
+    chown rd:rivendell /var/snd
+    chmod 775 /var/snd
+
     # postinst already creates 'rduser'@'%' (wildcard-host grant) in the
     # database itself on fresh install -- but that alone isn't enough:
     # MariaDB's own bind-address defaults to 127.0.0.1 (localhost only)
