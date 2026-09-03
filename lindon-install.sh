@@ -127,22 +127,22 @@ GDM
         fi
         session=${session:-plasma}
 
-        # Kubuntu's own 20-kubuntu.conf already ships an [Autologin]
-        # section (Session=plasma, empty User=) -- a second, separate
-        # file competing for the same section didn't reliably win
-        # (SDDM's actual multi-file conf.d precedence for this turned
-        # out not to match the "later filename wins" assumption tested
-        # on lindon-client: our file was last alphabetically and still
-        # lost). Editing whichever existing file already defines
-        # [Autologin] in place sidesteps the precedence question
-        # entirely, rather than gambling on load order a second time.
-        existing_file=$(grep -l '^\[Autologin\]' /etc/sddm.conf.d/*.conf 2>/dev/null | head -1)
-        if [ -n "$existing_file" ] ; then
-            sed -i '/^\[Autologin\]/,/^\[/{
-                /^User=/d
-                /^Session=/d
-            }' "$existing_file"
-            sed -i "/^\[Autologin\]/a User=rd\nSession=$session" "$existing_file"
+        # Kubuntu ships [Autologin] in more than one place, and SDDM's
+        # precedence between them proved to be the opposite of what
+        # seemed reasonable to assume -- tested on lindon-client twice:
+        # first a separate conf.d file lost to 20-kubuntu.conf, then
+        # 20-kubuntu.conf itself (correctly set) lost to /etc/sddm.conf.
+        # Rather than chase precedence rules a third time, just fix
+        # every file that actually defines [Autologin], wherever it is.
+        existing_files=$(grep -l '^\[Autologin\]' /etc/sddm.conf /etc/sddm.conf.d/*.conf 2>/dev/null)
+        if [ -n "$existing_files" ] ; then
+            for f in $existing_files ; do
+                sed -i '/^\[Autologin\]/,/^\[/{
+                    /^User=/d
+                    /^Session=/d
+                }' "$f"
+                sed -i "/^\[Autologin\]/a User=rd\nSession=$session" "$f"
+            done
         else
             cat > /etc/sddm.conf.d/lindon-autologin.conf <<SDDM
 [Autologin]
