@@ -314,10 +314,9 @@ LIMITS
 	 chmod 6755 /var/www/rd-bin/webget.cgi
       fi
 
-      echo "Rivolution installed. One manual step remains -- it's a"
-      echo "browser action, not a terminal command: open the dashboard"
-      echo "(http://<this-host>:8080/), go to /patchbay, connect and save"
-      echo "the caed -> Stereo Tool -> Liquidsoap audio chain."
+      echo "lindon installed. If this is a fresh install, run"
+      echo "lindon-install.sh next to finish setup (operator account,"
+      echo "autologin, NFS, database)."
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
