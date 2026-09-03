@@ -1,0 +1,29 @@
+diff --git a/lindon-install.sh b/lindon-install.sh
+index 4d087ac..990fee1 100755
+--- a/lindon-install.sh
++++ b/lindon-install.sh
+@@ -108,10 +108,10 @@ GDM
+         echo "SPICE console access (e.g. via Proxmox) has known"
+         echo "clipboard/resize/stability issues under Wayland that don't"
+         echo "reproduce under X11. Doesn't matter if you're not using SPICE."
+-        read -a RESP -p "Prefer X11 over Wayland for the desktop session? (Y/n) "
++        read -a X11_RESP -p "Prefer X11 over Wayland for the desktop session? (Y/n) "
+         echo
+         session=""
+-        if [ -z "$RESP" ] || [ "$RESP" == "y" ] || [ "$RESP" == "Y" ] ; then
++        if [ -z "$X11_RESP" ] || [ "$X11_RESP" == "y" ] || [ "$X11_RESP" == "Y" ] ; then
+             # Kubuntu 26.04 no longer installs plasma-session-x11 by
+             # default (Wayland-only out of the box) -- install it if an
+             # X11 Plasma session isn't already present.
+@@ -179,9 +179,9 @@ function ConfigureSampleRate {
+     echo "resamples on the fly. caed expects a fixed 44.1kHz -- broadcast"
+     echo "standard -- leaving it on 48kHz means constant resampling"
+     echo "overhead and avoidable quality loss."
+-    read -a RESP -p "Fix PipeWire's sample rate to 44.1kHz? (Y/n) "
++    read -a RATE_RESP -p "Fix PipeWire's sample rate to 44.1kHz? (Y/n) "
+     echo
+-    if [ -n "$RESP" ] && [ "$RESP" != "y" ] && [ "$RESP" != "Y" ] ; then
++    if [ -n "$RATE_RESP" ] && [ "$RATE_RESP" != "y" ] && [ "$RATE_RESP" != "Y" ] ; then
+         echo "Skipped -- PipeWire stays on its dynamic default rate."
+         return 0
+     fi
