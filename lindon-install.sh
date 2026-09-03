@@ -74,6 +74,10 @@ function EnsureRdUser {
 # Step 2: desktop autologin
 # ---------------------------------------------------------------------
 function ConfigureAutologin {
+    echo
+    echo "================================================================"
+    echo " Desktop autologin setup"
+    echo "================================================================"
     if systemctl list-unit-files 2>/dev/null | grep -q '^gdm3\.service' ; then
         echo "Detected GDM3 (GNOME) -- configuring autologin for rd."
         mkdir -p /etc/gdm3
@@ -96,19 +100,27 @@ GDM
         echo "Detected SDDM (KDE Plasma) -- configuring autologin for rd."
         mkdir -p /etc/sddm.conf.d
 
-        # Kubuntu 26.04 no longer installs plasma-session-x11 by default
-        # (Wayland-only out of the box) -- install it unconditionally so
-        # X11 is available as an option even if Wayland ends up being what
-        # actually gets used. Worth having: SPICE (used for remote console
-        # access to these VMs) has known clipboard/resize/stability issues
-        # under Wayland that don't reproduce under X11 in testing so far.
-        if [ ! -d /usr/share/xsessions ] || ! find /usr/share/xsessions -iname '*plasma*' -print -quit 2>/dev/null | grep -q . ; then
-            apt -y install plasma-session-x11
+        # SPICE (used for remote console access via Proxmox) has shown
+        # clipboard (guest-to-host paste)/resize/stability issues under
+        # Wayland that don't reproduce under X11 -- but that only matters
+        # on systems actually using SPICE, so ask rather than force it.
+        echo
+        echo "SPICE console access (e.g. via Proxmox) has known"
+        echo "clipboard/resize/stability issues under Wayland that don't"
+        echo "reproduce under X11. Doesn't matter if you're not using SPICE."
+        read -a X11_RESP -p "Prefer X11 over Wayland for the desktop session? (Y/n) "
+        echo
+        session=""
+        if [ -z "$X11_RESP" ] || [ "$X11_RESP" == "y" ] || [ "$X11_RESP" == "Y" ] ; then
+            # Kubuntu 26.04 no longer installs plasma-session-x11 by
+            # default (Wayland-only out of the box) -- install it if an
+            # X11 Plasma session isn't already present.
+            if [ ! -d /usr/share/xsessions ] || ! find /usr/share/xsessions -iname '*plasma*' -print -quit 2>/dev/null | grep -q . ; then
+                apt -y install plasma-session-x11
+            fi
+            session=$(find /usr/share/xsessions \
+                -iname '*plasma*' 2>/dev/null | head -1 | xargs -r basename -s .desktop)
         fi
-
-        # X11 first, Wayland as fallback.
-        session=$(find /usr/share/xsessions \
-            -iname '*plasma*' 2>/dev/null | head -1 | xargs -r basename -s .desktop)
         if [ -z "$session" ] ; then
             session=$(find /usr/share/wayland-sessions \
                 -iname '*plasma*' 2>/dev/null | head -1 | xargs -r basename -s .desktop)
@@ -167,9 +179,9 @@ function ConfigureSampleRate {
     echo "resamples on the fly. caed expects a fixed 44.1kHz -- broadcast"
     echo "standard -- leaving it on 48kHz means constant resampling"
     echo "overhead and avoidable quality loss."
-    read -a RESP -p "Fix PipeWire's sample rate to 44.1kHz? (Y/n) "
+    read -a RATE_RESP -p "Fix PipeWire's sample rate to 44.1kHz? (Y/n) "
     echo
-    if [ -n "$RESP" ] && [ "$RESP" != "y" ] && [ "$RESP" != "Y" ] ; then
+    if [ -n "$RATE_RESP" ] && [ "$RATE_RESP" != "y" ] && [ "$RATE_RESP" != "Y" ] ; then
         echo "Skipped -- PipeWire stays on its dynamic default rate."
         return 0
     fi
