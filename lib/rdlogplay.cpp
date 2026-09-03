@@ -2473,14 +2473,8 @@ void RDLogPlay::FinishEvent(int line)
       if((play_op_mode==RDAirPlayConf::Auto)&&
 	 (logline->id()!=-1)&&(play_next_line<lineCount())) {
 	if(logline->transType()!=RDLogLine::Stop) {
-	  if(runningEvents(NULL)==0) {
-	    StartEvent(play_next_line,RDLogLine::Play,0,RDLogLine::StartPlay);
-	    SetTransTimer(QTime(),prev_next_line==play_trans_line);
-	  }
-	  // else: something is still legitimately running (a segue tail, an
-	  // in-progress fade). Defer the hard-start -- that line's own
-	  // natural completion will call Finished() -> FinishEvent() again,
-	  // and this check will pass then.
+	  StartEvent(play_next_line,RDLogLine::Play,0,RDLogLine::StartPlay);
+	  SetTransTimer(QTime(),prev_next_line==play_trans_line);
 	}
       }
     }
@@ -3000,26 +2994,7 @@ void RDLogPlay::Finished(int id)
   switch(logline->status()) {
   case RDLogLine::Playing:
     CleanupEvent(id);
-    //
-    // FinishEvent() auto-advances to whatever the next not-yet-started
-    // line is -- correct when this line had nothing chained off its own
-    // segue markers, but wrong if the very next line is already
-    // running: that means an earlier segue (e.g. a "no fade on segue
-    // out" element left to play out its own natural length -- see
-    // docs/specs/0002-segue-backtiming.md) already started it, and
-    // GetNextPlayable() would otherwise skip past it and hard-start the
-    // line *after* that instead, killing the already-legitimately-
-    // playing successor via StartEvent()'s unconditional Play-transition
-    // stop-everything behavior.
-    //
-    {
-      RDLogLine *next_logline=logLine(line+1);
-      if((next_logline==NULL)||
-	 ((next_logline->status()!=RDLogLine::Playing)&&
-	  (next_logline->status()!=RDLogLine::Finishing))) {
-	FinishEvent(line);
-      }
-    }
+    FinishEvent(line);
     break;
 
   case RDLogLine::Auditioning:
