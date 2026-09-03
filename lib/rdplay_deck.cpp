@@ -18,6 +18,8 @@
 //   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 
+#include <syslog.h>
+
 #include <QSignalMapper>
 
 #include "rdapplication.h"
@@ -661,16 +663,7 @@ void RDPlayDeck::pointTimerData(int point)
       case RDPlayDeck::Segue:
 	if(play_point_state[point]) {
 	  play_point_state[point]=false;
-	  //
-	  // "No fade on segue out" (play_point_gain==0) means this element
-	  // is meant to play out undisturbed to its own natural end -- the
-	  // segue-end marker is timing data for what comes next, not a stop
-	  // command for this element. Only auto-stop here when a fade/duck
-	  // was actually requested.
-	  //
-	  if(play_point_gain!=0) {
-	    rda->cae()->stopPlay(play_serial);
-	  }
+	  rda->cae()->stopPlay(play_serial);
 	  emit segueEnd(play_id);
 	}
 	else {
@@ -838,6 +831,11 @@ void RDPlayDeck::StartTimers(int offset)
   // Initialize Segue Timers
   //
   play_point_state[RDPlayDeck::Segue]=false;
+  rda->syslog(LOG_DEBUG,
+	      "LINDON-DEBUG segue check: cartnum=%u start=%d end=%d",
+	      play_cart!=NULL?play_cart->number():0,
+	      play_point_value[RDPlayDeck::Segue][0],
+	      play_point_value[RDPlayDeck::Segue][1]);
   if((play_point_value[RDPlayDeck::Segue][0]>=0)&&
      (play_point_value[RDPlayDeck::Segue][1]>=0)&&
      (play_point_value[RDPlayDeck::Segue][1]>

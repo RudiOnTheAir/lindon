@@ -1573,25 +1573,6 @@ void RDLogPlay::segueStartData(int id)
      ((next_logline->transType()==RDLogLine::Segue))&&
      (logline->status()==RDLogLine::Playing)&&
      (logline->id()!=-1)) {
-    //
-    // Segue back-timing: if A ("logline") has "No fade on segue out" set
-    // (segueGain()==0), delay firing B so B's intro lands when A's tail
-    // actually finishes, instead of firing B the instant A hits its
-    // segue marker. See docs/specs/0002-segue-backtiming.md.
-    //
-    int backtime=0;
-    if(logline->segueGain()==0) {
-      backtime=logline->segueTail(next_logline->transType())-
-	next_logline->talkStartPoint();
-      if(backtime<0) {
-	backtime=0;
-      }
-    }
-    if(backtime>0) {
-      play_segue_backtime_id=id;
-      play_segue_backtime_timer->start(backtime);
-      return;
-    }
     if(!GetNextPlayable(&play_next_line,false)) {
       return;
     }
@@ -2039,19 +2020,9 @@ bool RDLogPlay::StartEvent(int line,RDLogLine::TransType trans_type,
 	       (prev_logline->status()!=RDLogLine::Paused)) {
 	      switch(logLine(lines[i])->cartType()) {
 	      case RDCart::Audio:
-		//
-		// "No fade on segue out" (segueGain()==0) means the outgoing
-		// element plays out undisturbed to its own natural end --
-		// don't mark it Finishing or schedule a stop against it.
-		// It's cleaned up normally via the ordinary Finished() path
-		// once it actually runs out. See docs/specs/0002-segue-
-		// backtiming.md.
-		//
-		if(prev_logline->segueGain()!=0) {
-		  prev_logline->setStatus(RDLogLine::Finishing);
-		  ((RDPlayDeck *)prev_logline->playDeck())->
-		    stop(trans_length);
-		}
+		prev_logline->setStatus(RDLogLine::Finishing);
+		((RDPlayDeck *)prev_logline->playDeck())->
+		  stop(trans_length);
 		break;
 
 	      case RDCart::Macro:
