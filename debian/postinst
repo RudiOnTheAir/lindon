@@ -54,11 +54,11 @@ case "$1" in
 
       /bin/systemctl daemon-reload
 
-      # rd: the service account this fork's spec 0007/0010 model runs
-      # caed/liquidsoap/rivapi/stereo-tool as. Expected to already exist
-      # (the operator's own login on a real install) -- this package does
-      # not create human accounts, only grants the audio group needed for
-      # real-time sound device access if the account is present.
+      # rd: the service account rivendell.service/caed run as. Expected
+      # to already exist (the operator's own login on a real install) --
+      # this package does not create human accounts, only grants the
+      # audio group needed for real-time sound device access if the
+      # account is present.
       if getent passwd rd >/dev/null; then
 	  usermod -aG audio rd
 
@@ -235,9 +235,7 @@ LIMITS
       # /etc destinations, same pattern as rd.conf-sample above.
       #
       mkdir -p /etc/systemd/system/rivendell.service.d
-      mkdir -p /etc/systemd/system/icecast2.service.d
       cp /usr/share/rivolution/systemd/rivolution-stack.target /etc/systemd/system/
-      cp /usr/share/rivolution/systemd/stereo-tool.service /etc/systemd/system/
       cp /usr/share/rivolution/systemd/rivendell.service.d/rivolution.conf /etc/systemd/system/rivendell.service.d/
       # rd's UID varies between machines even though the username is
       # always the same; resolve it now so rivendell.service's
@@ -247,7 +245,6 @@ LIMITS
 	  rd_uid=$(id -u rd)
 	  sed -i "s/%OPERATOR_UID%/$rd_uid/g" /etc/systemd/system/rivendell.service.d/rivolution.conf
       fi
-      cp /usr/share/rivolution/systemd/icecast2.service.d/rivolution.conf /etc/systemd/system/icecast2.service.d/
 
       # liquidsoap.service is fully decommissioned (replaced by the
       # ffmpeg-based rivolution-task-* stream services) -- clean up a
