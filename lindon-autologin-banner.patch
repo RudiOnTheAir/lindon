@@ -1,0 +1,15 @@
+diff --git a/lindon-install.sh b/lindon-install.sh
+index c3291fa..4d087ac 100755
+--- a/lindon-install.sh
++++ b/lindon-install.sh
+@@ -74,6 +74,10 @@ function EnsureRdUser {
+ # Step 2: desktop autologin
+ # ---------------------------------------------------------------------
+ function ConfigureAutologin {
++    echo
++    echo "================================================================"
++    echo " Desktop autologin setup"
++    echo "================================================================"
+     if systemctl list-unit-files 2>/dev/null | grep -q '^gdm3\.service' ; then
+         echo "Detected GDM3 (GNOME) -- configuring autologin for rd."
+         mkdir -p /etc/gdm3
