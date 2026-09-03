@@ -340,7 +340,29 @@ function SetupNfsClient {
         s/^Database=.*/Database=$RD_MYSQL_DB/
     }" "$rd_conf_real"
 
+    # A database taken over from elsewhere (or from a server that's never
+    # seen this particular client before) has no Hosts entry for this
+    # machine yet -- rdservice refuses to start over that ("This host
+    # (...) does not have a Hosts entry in the database", ExitNoDb) and
+    # just sits in a restart loop until one is added. No way to do this
+    # from a headless script (it's an rdadmin GUI action against the
+    # database), so: restart anyway (harmless, just keeps retrying) and
+    # tell the operator very explicitly what to do next.
     systemctl restart rivendell
+    this_host=$(hostname)
+    echo
+    echo "----------------------------------------------------------------"
+    echo " One more manual step, likely needed:"
+    echo
+    echo " If this is the first time '$this_host' has connected to this"
+    echo " database, rivendell.service will keep failing/restarting until"
+    echo " this host is registered in it. Fix:"
+    echo "   1. Open rdadmin"
+    echo "   2. Manage Hosts -> Add"
+    echo "   3. Add a host named '$this_host', save"
+    echo " rivendell.service will pick it up on its next auto-restart --"
+    echo " no need to restart it manually afterward."
+    echo "----------------------------------------------------------------"
 }
 
 # ---------------------------------------------------------------------
