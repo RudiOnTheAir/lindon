@@ -136,6 +136,15 @@ bool MainObject::Check(QString *err_msg)
   }
 
   //
+  // Recalculate Lengths
+  //
+  if(db_check_all) {
+    printf("Recalculating audio lengths (this may take some time)...\n");
+    RecalculateLengths();
+    printf("done.\n\n");
+  }
+
+  //
   // Validating Audio Lengths
   //
   if(db_check_all) {
@@ -682,6 +691,34 @@ void MainObject::CheckCutCounts() const
       }
     }
     delete q1;
+  }
+  delete q;
+}
+
+
+void MainObject::RecalculateLengths() const
+{
+  QString sql;
+  QSqlQuery *q;
+  unsigned c=0;
+
+  sql=QString("select ")+
+    "`NUMBER`,"+        // 00
+    "`CUT_QUANTITY`,"+  // 01
+    "`TITLE` "+         // 02
+    "from `CART`";
+  q=new QSqlQuery(sql);
+  while(q->next()) {
+    RDCart *cart=new RDCart(q->value(0).toUInt());
+    if(cart->type()==RDCart::Audio) {
+      cart->updateLength();
+    }
+    delete cart;
+
+    c++;
+    if(c%1000==0) {
+      printf("Recalculating: %u\n",c);
+    }
   }
   delete q;
 }
