@@ -378,7 +378,15 @@ function SetupNfsClient {
     # from a headless script (it's an rdadmin GUI action against the
     # database), so: restart anyway (harmless, just keeps retrying) and
     # tell the operator very explicitly what to do next.
-    systemctl restart rivendell
+    #
+    # "|| true" matters here: systemctl restart blocks until the start
+    # job settles, and caed's own readiness probe (ExecStartPost) fails
+    # the whole job after a 30s timeout when rdservice can't open the
+    # database -- meaning this command legitimately returns non-zero in
+    # exactly the situation this comment is about. Without the
+    # override, set -e would kill the script right here, silently
+    # skipping the hint below and the closing banner entirely.
+    systemctl restart rivendell || true
     this_host=$(hostname)
     echo
     echo "----------------------------------------------------------------"
