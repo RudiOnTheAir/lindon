@@ -66,8 +66,13 @@ EditEvent::EditEvent(QWidget *parent)
   radio_button=new QRadioButton(tr("Wait up to"),edit_grace_group);
   radio_button->setFont(subLabelFont());
   edit_grace_bgroup->addButton(radio_button,2);
+  radio_button=new QRadioButton(tr("Make Next && Wait max"),edit_grace_group);
+  radio_button->setFont(subLabelFont());
+  edit_grace_bgroup->addButton(radio_button,3);
   edit_grace_timeedit=new QTimeEdit(this);
   edit_grace_timeedit->setDisplayFormat("mm:ss");
+  edit_grace_timeedit2=new QTimeEdit(this);       // lindon
+  edit_grace_timeedit2->setDisplayFormat("mm:ss");
   connect(edit_timetype_box,SIGNAL(toggled(bool)),
 	  this,SLOT(timeToggledData(bool)));
   connect(edit_grace_bgroup,SIGNAL(idClicked(int)),
@@ -109,22 +114,27 @@ int EditEvent::exec()
   edit_timetype_box->setChecked(edit_logline->timeType()==RDLogLine::Hard);
   timeToggledData(edit_logline->timeType()==RDLogLine::Hard);
   timeChangedData(edit_time_edit->time());
-  switch(edit_logline->graceTime()) {
-  case -1:
-    edit_grace_bgroup->button(1)->setChecked(true);
-    graceClickedData(1);
-    break;
-
-  case 0:
-    edit_grace_bgroup->button(0)->setChecked(true);
-    graceClickedData(0);
-    break;
-
-  default:
-    edit_grace_bgroup->button(2)->setChecked(true);
-    edit_grace_timeedit->setTime(QTime(0,0,0).addMSecs(edit_logline->graceTime()));
-    graceClickedData(2);
-    break;
+  {
+    int grace=edit_logline->graceTime();
+    if(grace==-1) {
+      edit_grace_bgroup->button(1)->setChecked(true);
+      graceClickedData(1);
+    }
+    else if(grace==0) {
+      edit_grace_bgroup->button(0)->setChecked(true);
+      graceClickedData(0);
+    }
+    else if(grace<=-2) {   // lindon: Make Next && Wait max <timeout>
+      int timeout_ms=-grace-2;
+      edit_grace_bgroup->button(3)->setChecked(true);
+      edit_grace_timeedit2->setTime(QTime(0,0,0).addMSecs(timeout_ms));
+      graceClickedData(3);
+    }
+    else {                 // grace>0: Wait up to
+      edit_grace_bgroup->button(2)->setChecked(true);
+      edit_grace_timeedit->setTime(QTime(0,0,0).addMSecs(grace));
+      graceClickedData(2);
+    }
   }
   edit_transtype_box->setCurrentIndex(edit_logline->transType());
 
@@ -155,6 +165,7 @@ void EditEvent::timeToggledData(bool state)
   edit_grace_bgroup->button(0)->setEnabled(state);
   edit_grace_bgroup->button(1)->setEnabled(state);
   edit_grace_bgroup->button(2)->setEnabled(state);
+  edit_grace_bgroup->button(3)->setEnabled(state);   // lindon
   if(state) {
     graceClickedData(edit_grace_bgroup->checkedId());
     edit_transtype_label->
@@ -163,6 +174,7 @@ void EditEvent::timeToggledData(bool state)
   }
   else {
     edit_grace_timeedit->setDisabled(true);
+    edit_grace_timeedit2->setDisabled(true);   // lindon
     edit_transtype_label->setText(tr("Transition Type")+":");
   }
 }
@@ -173,14 +185,22 @@ void EditEvent::graceClickedData(int id)
   switch(id) {
   case 0:
     edit_grace_timeedit->setDisabled(true);
+    edit_grace_timeedit2->setDisabled(true);   // lindon
     break;
 
   case 1:
     edit_grace_timeedit->setDisabled(true);
+    edit_grace_timeedit2->setDisabled(true);   // lindon
     break;
 
   case 2:
     edit_grace_timeedit->setEnabled(true);
+    edit_grace_timeedit2->setDisabled(true);   // lindon
+    break;
+
+  case 3:
+    edit_grace_timeedit->setDisabled(true);    // lindon
+    edit_grace_timeedit2->setEnabled(true);    // lindon
     break;
   }
 }
@@ -192,6 +212,7 @@ void EditEvent::selectTimeData(int id)
     edit_time_edit->setDisabled(true);
     edit_transtype_label->setDisabled(true);
     edit_grace_timeedit->setDisabled(true);
+    edit_grace_timeedit2->setDisabled(true);   // lindon
   }
   else {
     edit_time_edit->setEnabled(true);
@@ -217,6 +238,13 @@ void EditEvent::okData()
 
       case 2:
 	edit_logline->setGraceTime(QTime(0,0,0).msecsTo(edit_grace_timeedit->time()));
+	break;
+
+      case 3:
+	// lindon: Make Next && Wait max -- graceTime <= -2,
+	// timeout_ms = -graceTime - 2
+	edit_logline->
+	  setGraceTime(-QTime(0,0,0).msecsTo(edit_grace_timeedit2->time())-2);
 	break;
       }
     }
@@ -255,14 +283,25 @@ void EditEvent::resizeEvent(QResizeEvent *e)
   edit_timetype_box->setGeometry(10,22,15,15);
   edit_timetype_label->setGeometry(30,19,85,20);
   edit_time_edit->setGeometry(85,19,110,20);
-  edit_grace_group->setGeometry(205,11,410,42);
+  // lindon: group heightened 42->64 for 4th radio button on row 2;
+  // transtype_label/box shifted +22px accordingly.
+  edit_grace_group->setGeometry(205,11,410,64);
   edit_grace_bgroup->button(0)->setGeometry(10,16,145,20);
   edit_grace_bgroup->button(1)->setGeometry(155,16,105,20);
   edit_grace_bgroup->button(2)->setGeometry(265,16,95,20);
+  edit_grace_bgroup->button(3)->setGeometry(10,39,220,20);
   edit_grace_timeedit->setGeometry(548,26,60,20);
+  // lindon: edit_grace_timeedit2 is a child of the dialog (`this`), not of
+  // edit_grace_group -- so it needs dialog-absolute coordinates:
+  // group origin + button's own x + rendered text width + 25px indicator/gap.
+  edit_grace_timeedit2->
+    setGeometry(edit_grace_group->x()+10+25+
+		QFontMetrics(edit_grace_bgroup->button(3)->font()).
+		horizontalAdvance(edit_grace_bgroup->button(3)->text()),
+		edit_grace_group->y()+39,60,20);
 
-  edit_transtype_label->setGeometry(10,60,370,26);
-  edit_transtype_box->setGeometry(385,60,110,26);
+  edit_transtype_label->setGeometry(10,82,370,26);
+  edit_transtype_box->setGeometry(385,82,110,26);
 
   edit_ok_button->setGeometry(size().width()-180,size().height()-60,80,50);
   edit_cancel_button->setGeometry(size().width()-90,size().height()-60,80,50);

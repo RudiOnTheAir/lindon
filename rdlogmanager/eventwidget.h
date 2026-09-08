@@ -106,7 +106,9 @@ class EventWidget : public RDWidget
   QRadioButton *event_immediate_button;
   QRadioButton *event_next_button;
   QRadioButton *event_wait_button;
+  QRadioButton *event_makenextwait_button;   // lindon
   QTimeEdit *event_grace_edit;
+  QTimeEdit *event_grace_edit2;              // lindon: separate field for "Make Next & Wait max"
   QGroupBox *event_autofill_group;
   QLabel *event_autofill_label;
   QCheckBox *event_autofill_box;

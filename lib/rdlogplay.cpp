@@ -1454,6 +1454,30 @@ void RDLogPlay::transTimerData()
 	SetTransTimer();
 	return;
       }
+      if(logline->graceTime()<=-2) {  // lindon: Make Next && Wait max <timeout>
+	int timeout_ms=-logline->graceTime()-2;
+	rda->syslog(LOG_DEBUG,
+	       "lindon: MakeNextWaitMax line=%d timeout=%dms running=%d",
+	       trans_line,timeout_ms,running_events);
+	makeNext(trans_line);
+	// NOTE: makeNext() calls SetTransTimer() internally, which can
+	// overwrite the play_trans_line *member* with the next upcoming
+	// hard-time line. Use the local trans_line (captured at function
+	// entry, before any of this) for everything below -- never
+	// play_trans_line again in this branch.
+	if(running_events>0) {
+	  play_grace_line=trans_line;
+	  play_grace_timer->start(timeout_ms);
+	  rda->syslog(LOG_DEBUG,
+		 "lindon: MakeNextWaitMax line=%d grace timer armed",
+		 trans_line);
+	  return;
+	}
+	rda->syslog(LOG_DEBUG,
+	       "lindon: MakeNextWaitMax line=%d nothing running, falling through to immediate start",
+	       trans_line);
+	// nothing running: fall through to the normal immediate-start path below
+      }
       if(logline->graceTime()>0) {
 	if(running_events>0) {
 	  if(logline->transType()==RDLogLine::Stop) {
@@ -1496,6 +1520,9 @@ void RDLogPlay::graceTimerData()
 {
   int lines[TRANSPORT_QUANTITY];
   int line=play_grace_line;
+
+  rda->syslog(LOG_DEBUG,"lindon: graceTimerData() fired for line=%d",
+	 play_grace_line);
 
   if(play_op_mode==RDAirPlayConf::Auto) {
     if(!GetNextPlayable(&line,false)) {
@@ -2970,6 +2997,9 @@ void RDLogPlay::Stopped(int id)
   LogTraffic(logLine(line),(RDLogLine::PlaySource)(play_id+1),
 	     RDAirPlayConf::TrafficStop,play_onair_flag);
   if(play_grace_timer->isActive()) {  // Pending Hard Time Event
+    rda->syslog(LOG_DEBUG,
+	   "lindon: predecessor Stopped() early, waking grace timer for line=%d",
+	   play_grace_line);
     play_grace_timer->stop();
     play_grace_timer->start(0);
     return;

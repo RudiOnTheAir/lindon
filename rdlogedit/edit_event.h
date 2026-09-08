@@ -65,6 +65,7 @@ class EditEvent : public RDDialog
   QButtonGroup *edit_grace_bgroup;
   QGroupBox *edit_grace_group;
   QTimeEdit *edit_grace_timeedit;
+  QTimeEdit *edit_grace_timeedit2;   // lindon: separate field for "Make Next & Wait max"
   QPushButton *edit_ok_button;
   QPushButton *edit_cancel_button;
 };

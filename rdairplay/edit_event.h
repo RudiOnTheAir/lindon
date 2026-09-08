@@ -66,6 +66,7 @@ class EditEvent : public RDDialog
   QGroupBox *edit_grace_group;
   QButtonGroup *edit_grace_bgroup;
   RDTimeEdit *edit_grace_edit;
+  RDTimeEdit *edit_grace_edit2;   // lindon: separate time field for "Make Next & Wait max"
   QLabel *edit_transtype_label;
   QComboBox *edit_transtype_box;
   QCheckBox *edit_overlap_box;

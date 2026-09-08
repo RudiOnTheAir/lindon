@@ -27,7 +27,7 @@ EditEvent::EditEvent(RDLogPlay *log,QWidget *parent)
   : RDDialog(parent)
 {
   edit_log=log;
-  edit_height=385;
+  edit_height=403;  // lindon: +18 for 4th grace radio button row
   setWindowTitle("RDAirPlay - "+tr("Edit Event"));
 
   //
@@ -65,10 +65,17 @@ EditEvent::EditEvent(RDLogPlay *log,QWidget *parent)
   radio_button=new QRadioButton(tr("Wait up to"),edit_grace_group);
   edit_grace_bgroup->addButton(radio_button,2);
   radio_button->setFont(subLabelFont());
+  radio_button=new QRadioButton(tr("Make Next && Wait max"),edit_grace_group);
+  edit_grace_bgroup->addButton(radio_button,3);
+  radio_button->setFont(subLabelFont());
   edit_grace_edit=new RDTimeEdit(edit_grace_group);
   edit_grace_edit->setFont(defaultFont());
   edit_grace_edit->setShowHours(false);
   edit_grace_edit->setShowTenths(true);
+  edit_grace_edit2=new RDTimeEdit(edit_grace_group);   // lindon
+  edit_grace_edit2->setFont(defaultFont());
+  edit_grace_edit2->setShowHours(false);
+  edit_grace_edit2->setShowTenths(true);
   connect(edit_timetype_box,SIGNAL(toggled(bool)),
 	  this,SLOT(timeToggledData(bool)));
 
@@ -176,23 +183,29 @@ int EditEvent::exec(int line)
 	break;
   }
   timeChangedData(edit_time_edit->time());
-  switch(edit_logline->graceTime()) {
-      case -1:
-	edit_grace_bgroup->button(1)->setChecked(true);
-	graceClickedData(1);
-	break;
-
-      case 0:
-	edit_grace_bgroup->button(0)->setChecked(true);
-	graceClickedData(0);
-	break;
-
-      default:
-	edit_grace_bgroup->button(2)->setChecked(true);
-	graceClickedData(2);
-	edit_grace_edit->setTime(QTime(0,0,0).addMSecs(edit_logline->graceTime()));
-	edit_grace_edit->setLength(edit_logline->graceTime());
-	break;
+  {
+    int grace=edit_logline->graceTime();
+    if(grace==-1) {
+      edit_grace_bgroup->button(1)->setChecked(true);
+      graceClickedData(1);
+    }
+    else if(grace==0) {
+      edit_grace_bgroup->button(0)->setChecked(true);
+      graceClickedData(0);
+    }
+    else if(grace<=-2) {   // lindon: Make Next && Wait max <timeout>
+      int timeout_ms=-grace-2;
+      edit_grace_bgroup->button(3)->setChecked(true);
+      graceClickedData(3);
+      edit_grace_edit2->setTime(QTime(0,0,0).addMSecs(timeout_ms));
+      edit_grace_edit2->setLength(timeout_ms);
+    }
+    else {                 // grace>0: Wait up to
+      edit_grace_bgroup->button(2)->setChecked(true);
+      graceClickedData(2);
+      edit_grace_edit->setTime(QTime(0,0,0).addMSecs(grace));
+      edit_grace_edit->setLength(grace);
+    }
   }
   edit_transtype_box->setCurrentIndex((int)edit_logline->transType());
   if(edit_logline->segueStartPoint(RDLogLine::LogPointer)<0
@@ -230,12 +243,12 @@ int EditEvent::exec(int line)
       edit_cue_edit->hide();
       edit_using_cue=false;
       if(edit_logline->cartNotes().isEmpty()) {
-	edit_height=195;
+	edit_height=213;  // lindon: +18 for 4th grace radio button row
 	edit_cart_notes_label->hide();
 	edit_cart_notes_text->hide();
       }
       else {
-	edit_height=375;
+	edit_height=393;  // lindon: +18 for 4th grace radio button row
 	edit_cart_notes_label->show();
 	edit_cart_notes_text->show();
       }
@@ -245,12 +258,12 @@ int EditEvent::exec(int line)
       edit_cue_edit->show();
       edit_using_cue=true;
       if(edit_logline->cartNotes().isEmpty()) {
-	edit_height=360;
+	edit_height=378;  // lindon: +18 for 4th grace radio button row
 	edit_cart_notes_label->hide();
 	edit_cart_notes_text->hide();
       }
       else {
-	edit_height=540;
+	edit_height=558;  // lindon: +18 for 4th grace radio button row
 	edit_cart_notes_label->show();
 	edit_cart_notes_text->show();
       }
@@ -261,12 +274,12 @@ int EditEvent::exec(int line)
     edit_cue_edit->hide();
     edit_using_cue=false;
     if(edit_logline->cartNotes().isEmpty()) {
-      edit_height=195;
+      edit_height=213;  // lindon: +18 for 4th grace radio button row
       edit_cart_notes_label->hide();
       edit_cart_notes_text->hide();
     }
     else {
-      edit_height=325;
+      edit_height=343;  // lindon: +18 for 4th grace radio button row
       edit_cart_notes_label->show();
       edit_cart_notes_text->show();
     }
@@ -278,7 +291,7 @@ int EditEvent::exec(int line)
     edit_using_cue=false;
     edit_cart_notes_label->hide();
     edit_cart_notes_text->hide();
-    edit_height=195;
+    edit_height=213;  // lindon: +18 for 4th grace radio button row
     break;
 
   case RDLogLine::Track:
@@ -287,7 +300,7 @@ int EditEvent::exec(int line)
     edit_using_cue=false;
     edit_cart_notes_label->hide();
     edit_cart_notes_text->hide();
-    edit_height=195;
+    edit_height=213;  // lindon: +18 for 4th grace radio button row
     break;
 
   case RDLogLine::Chain:
@@ -296,13 +309,13 @@ int EditEvent::exec(int line)
     edit_using_cue=false;
     edit_cart_notes_label->hide();
     edit_cart_notes_text->hide();
-    edit_height=195;
+    edit_height=213;  // lindon: +18 for 4th grace radio button row
     break;
 
   default:
     edit_cue_edit->hide();
     edit_using_cue=false;
-    edit_height=195;
+    edit_height=213;  // lindon: +18 for 4th grace radio button row
     break;
   }
 
@@ -344,6 +357,7 @@ void EditEvent::timeToggledData(bool state)
   }
   else {
     edit_grace_edit->setDisabled(true);
+    edit_grace_edit2->setDisabled(true);   // lindon
     edit_transtype_label->setText(tr("Start Transition Type:"));
   }
 }
@@ -354,14 +368,22 @@ void EditEvent::graceClickedData(int id)
   switch(id) {
       case 0:
 	edit_grace_edit->setDisabled(true);
+	edit_grace_edit2->setDisabled(true);   // lindon
 	break;
 
       case 1:
 	edit_grace_edit->setDisabled(true);
+	edit_grace_edit2->setDisabled(true);   // lindon
 	break;
 
       case 2:
 	edit_grace_edit->setEnabled(true);
+	edit_grace_edit2->setDisabled(true);   // lindon
+	break;
+
+      case 3:
+	edit_grace_edit->setDisabled(true);    // lindon
+	edit_grace_edit2->setEnabled(true);    // lindon
 	break;
   }
 }
@@ -391,6 +413,12 @@ void EditEvent::okData()
 
 	  case 2:
 	    edit_logline->setGraceTime(edit_grace_edit->length());
+	    break;
+
+	  case 3:
+	    // lindon: Make Next && Wait max -- graceTime <= -2,
+	    // timeout_ms = -graceTime - 2
+	    edit_logline->setGraceTime(-edit_grace_edit2->length()-2);
 	    break;
       }
     }
@@ -449,33 +477,42 @@ void EditEvent::resizeEvent(QResizeEvent *e)
   edit_timetype_box->setGeometry(10,22,15,15);
   edit_timetype_label->setGeometry(30,21,85,17);
   edit_time_edit->setGeometry(85,19,120,20);
-  edit_grace_group->setGeometry(215,11,435,50);
+  // lindon: group heightened 50->68 (4th radio button on 2nd row);
+  // everything from edit_overlap_box downward shifted +18px accordingly.
+  edit_grace_group->setGeometry(215,11,435,68);
   edit_width=edit_grace_group->x()+edit_grace_group->width()+400;
   edit_grace_bgroup->button(0)->setGeometry(10,21,145,20);
   edit_grace_bgroup->button(1)->setGeometry(155,21,105,20);
   edit_grace_bgroup->button(2)->setGeometry(265,21,95,20);
+  edit_grace_bgroup->button(3)->setGeometry(10,44,220,20);
   edit_grace_edit->setGeometry(345,21,75,20);
+  // lindon: size field2's x from the button's actual rendered text width,
+  // not a guessed pixel offset -- 25px covers the radio indicator + gap.
+  edit_grace_edit2->
+    setGeometry(10+25+QFontMetrics(edit_grace_bgroup->button(3)->font()).
+		horizontalAdvance(edit_grace_bgroup->button(3)->text()),
+		44,75,20);
 
-  edit_overlap_box->setGeometry(30,72,15,15);
-  edit_overlap_label->setGeometry(50,68,400,26);
+  edit_overlap_box->setGeometry(30,90,15,15);
+  edit_overlap_label->setGeometry(50,86,400,26);
 
-  edit_transtype_label->setGeometry(10,90,470,26);
-  edit_transtype_box->setGeometry(485,90,110,26);
+  edit_transtype_label->setGeometry(10,108,470,26);
+  edit_transtype_box->setGeometry(485,108,110,26);
 
-  edit_horizrule_label->setGeometry(0,122,size().width(),3);
+  edit_horizrule_label->setGeometry(0,140,size().width(),3);
 
-  edit_cue_edit->setGeometry(20+25,132,edit_cue_edit->sizeHint().width(),
+  edit_cue_edit->setGeometry(20+25,150,edit_cue_edit->sizeHint().width(),
 			     edit_cue_edit->sizeHint().height());
   if(edit_using_cue) {
     edit_cart_notes_label->
-      setGeometry(15,127+edit_cue_edit->sizeHint().height(),
+      setGeometry(15,145+edit_cue_edit->sizeHint().height(),
 		  size().width()-20,20);
-    edit_cart_notes_text->setGeometry(10,147+edit_cue_edit->sizeHint().height(),
+    edit_cart_notes_text->setGeometry(10,165+edit_cue_edit->sizeHint().height(),
 				      size().width()-20,100);
   }
   else {
-    edit_cart_notes_label->setGeometry(15,127,size().width()-20,20);
-    edit_cart_notes_text->setGeometry(10,147,size().width()-20,100);
+    edit_cart_notes_label->setGeometry(15,145,size().width()-20,20);
+    edit_cart_notes_text->setGeometry(10,165,size().width()-20,100);
   }
   edit_ok_button->setGeometry(size().width()-180,size().height()-60,80,50);
   edit_cancel_button->setGeometry(size().width()-90,size().height()-60,80,50);

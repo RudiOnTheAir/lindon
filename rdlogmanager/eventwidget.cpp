@@ -79,9 +79,14 @@ EventWidget::EventWidget(QWidget *parent)
   event_wait_button=new QRadioButton(tr("Wait up to"),this);
   event_wait_button->setFont(subLabelFont());
   event_grace_group->addButton(event_wait_button,2);
+  event_makenextwait_button=new QRadioButton(tr("Make Next && Wait max"),this);
+  event_makenextwait_button->setFont(subLabelFont());
+  event_grace_group->addButton(event_makenextwait_button,3);
 
   event_grace_edit=new QTimeEdit(this);
   event_grace_edit->setDisplayFormat("mm:ss");
+  event_grace_edit2=new QTimeEdit(this);       // lindon
+  event_grace_edit2->setDisplayFormat("mm:ss");
   connect(event_timetype_check,SIGNAL(toggled(bool)),
 	  this,SLOT(timeToggledData(bool)));
   connect(event_grace_group,SIGNAL(idClicked(int)),
@@ -340,6 +345,12 @@ QString EventWidget::properties() const
       grace_msec=-1;
       break;
 
+    case 3:
+      // lindon: Make Next && Wait max -- graceTime <= -2,
+      // timeout_ms = -graceTime - 2
+      grace_msec=-QTime(0,0,0).msecsTo(event_grace_edit2->time())-2;
+      break;
+
     default:
       grace_msec=QTime(0,0,0).msecsTo(event_grace_edit->time());
       break;	  
@@ -448,21 +459,31 @@ void EventWidget::load(RDEvent *evt)
 	
   case RDLogLine::Hard:
     event_timetype_check->setChecked(true);
-    switch((grace=event_event->graceTime())) {
-    case 0:
-      event_grace_group->button(0)->setChecked(true);
-      event_grace_edit->setTime(QTime());
-      break;
+    grace=event_event->graceTime();   // lindon: BUGFIX - this assignment was
+    // accidentally dropped when the old switch((grace=...)) was restructured;
+    // without it, grace stayed 0 forever and load() always showed "Start
+    // Immediately", no matter what was actually saved.
+    if(grace<=-2) {   // lindon: Make Next && Wait max <timeout>
+      event_grace_group->button(3)->setChecked(true);
+      event_grace_edit2->setTime(QTime(0,0,0).addMSecs(-grace-2));
+    }
+    else {
+      switch(grace) {
+      case 0:
+	event_grace_group->button(0)->setChecked(true);
+	event_grace_edit->setTime(QTime());
+	break;
 	      
-    case -1:
-      event_grace_group->button(1)->setChecked(true);
-      event_grace_edit->setTime(QTime());
-      break;
+      case -1:
+	event_grace_group->button(1)->setChecked(true);
+	event_grace_edit->setTime(QTime());
+	break;
 	      
-    default:
-      event_grace_group->button(2)->setChecked(true);
-      event_grace_edit->setTime(QTime(0,0,0).addMSecs(grace));
-      break;
+      default:
+	event_grace_group->button(2)->setChecked(true);
+	event_grace_edit->setTime(QTime(0,0,0).addMSecs(grace));
+	break;
+      }
     }
 
   case RDLogLine::NoTime:
@@ -519,21 +540,31 @@ void EventWidget::load(RDEvent *evt)
 	
   case RDLogLine::Hard:
     event_timetype_check->setChecked(true);
-    switch((grace=event_event->graceTime())) {
-    case 0:
-      event_grace_group->button(0)->setChecked(true);
-      event_grace_edit->setTime(QTime());
-      break;
+    grace=event_event->graceTime();   // lindon: BUGFIX - this assignment was
+    // accidentally dropped when the old switch((grace=...)) was restructured;
+    // without it, grace stayed 0 forever and load() always showed "Start
+    // Immediately", no matter what was actually saved.
+    if(grace<=-2) {   // lindon: Make Next && Wait max <timeout>
+      event_grace_group->button(3)->setChecked(true);
+      event_grace_edit2->setTime(QTime(0,0,0).addMSecs(-grace-2));
+    }
+    else {
+      switch(grace) {
+      case 0:
+	event_grace_group->button(0)->setChecked(true);
+	event_grace_edit->setTime(QTime());
+	break;
 	      
-    case -1:
-      event_grace_group->button(1)->setChecked(true);
-      event_grace_edit->setTime(QTime());
-      break;
+      case -1:
+	event_grace_group->button(1)->setChecked(true);
+	event_grace_edit->setTime(QTime());
+	break;
 	      
-    default:
-      event_grace_group->button(2)->setChecked(true);
-      event_grace_edit->setTime(QTime(0,0,0).addMSecs(grace));
-      break;
+      default:
+	event_grace_group->button(2)->setChecked(true);
+	event_grace_edit->setTime(QTime(0,0,0).addMSecs(grace));
+	break;
+      }
     }
 
   case RDLogLine::NoTime:
@@ -566,6 +597,13 @@ void EventWidget::save(RDEvent *evt) const
 
     case 1:
       event_event->setGraceTime(-1);
+      break;
+
+    case 3:
+      // lindon: Make Next && Wait max -- graceTime <= -2,
+      // timeout_ms = -graceTime - 2
+      event_event->
+	setGraceTime(-QTime(0,0,0).msecsTo(event_grace_edit2->time())-2);
       break;
 
     default:
@@ -655,6 +693,7 @@ void EventWidget::prepositionToggledData(bool state)
     event_immediate_button->setDisabled(state);
     event_next_button->setDisabled(state);
     event_wait_button->setDisabled(state);
+    event_makenextwait_button->setDisabled(state);   // lindon
   }
 
   //
@@ -675,7 +714,9 @@ void EventWidget::timeToggledData(bool state)
   event_immediate_button->setEnabled(state);
   event_next_button->setEnabled(state);
   event_wait_button->setEnabled(state);
+  event_makenextwait_button->setEnabled(state);   // lindon
   event_grace_edit->setEnabled(state);
+  event_grace_edit2->setEnabled(state);           // lindon
   if(state) {
     graceClickedData(event_grace_group->checkedId());
     timeTransitionData(2);
@@ -687,6 +728,7 @@ void EventWidget::timeToggledData(bool state)
   }
   else {
     event_grace_edit->setDisabled(true);
+    event_grace_edit2->setDisabled(true);         // lindon
     if(event_position_box->isChecked()) {
       event_position_edit->setEnabled(true);
     }
@@ -704,16 +746,25 @@ void EventWidget::graceClickedData(int id)
   case 0:
     timeTransitionData(RDLogLine::Stop);
     event_grace_edit->setDisabled(true);
+    event_grace_edit2->setDisabled(true);   // lindon
     break;
 
   case 1:
     timeTransitionData(RDLogLine::Segue);
     event_grace_edit->setDisabled(true);
+    event_grace_edit2->setDisabled(true);   // lindon
     break;
 
   case 2:
     timeTransitionData(RDLogLine::Segue);
     event_grace_edit->setEnabled(true);
+    event_grace_edit2->setDisabled(true);   // lindon
+    break;
+
+  case 3:
+    timeTransitionData(RDLogLine::Segue);   // lindon
+    event_grace_edit->setDisabled(true);    // lindon
+    event_grace_edit2->setEnabled(true);    // lindon
     break;
   }
 }
@@ -811,7 +862,7 @@ void EventWidget::resizeEvent(QResizeEvent *e)
   //
   // Timed Start Section
   //
-  event_timetype_group->setGeometry(0,49,sizeHint().width()-15,66);
+  event_timetype_group->setGeometry(0,49,sizeHint().width()-15,88);  // lindon: +22 for 4th grace row
 
   //
   // Time Start Section
@@ -821,83 +872,89 @@ void EventWidget::resizeEvent(QResizeEvent *e)
   event_timetype_label->setGeometry(25,69,120,16);
 
   // Grace Time
-  event_grace_groupbox->setGeometry(160,69,sizeHint().width()-200,42);
+  event_grace_groupbox->setGeometry(160,69,sizeHint().width()-200,64);  // lindon: +22
   event_immediate_button->setGeometry(170,92,160,15);
   event_next_button->setGeometry(310,92,160,15);
   event_wait_button->setGeometry(420,92,160,15);
   event_grace_edit->setGeometry(500,89,60,20);
+  event_makenextwait_button->setGeometry(170,114,220,15);   // lindon: row 2
+  // lindon: size from the button's own rendered text width, not a guess.
+  event_grace_edit2->
+    setGeometry(170+25+QFontMetrics(event_makenextwait_button->font()).
+		horizontalAdvance(event_makenextwait_button->text()),
+		111,60,20);
 
   //
   // Transitions Section
   //
   event_transitions_group->
-    setGeometry(0,120,sizeHint().width()-15,63);
+    setGeometry(0,142,sizeHint().width()-15,63);  // lindon: +22
 
   // First Cart Transition Type
   event_firsttrans_label->
-    setGeometry(5,140,
+    setGeometry(5,162,  // lindon: +22
 		labelFontMetrics()->horizontalAdvance(event_firsttrans_label->text()+" "),
 		20);
   event_firsttrans_box->setGeometry(event_firsttrans_label->geometry().x()+
 				    event_firsttrans_label->geometry().width(),
-				    140,90,20);
+				    162,90,20);  // lindon: +22
   event_firsttrans_unit->
     setGeometry(event_firsttrans_box->geometry().x()+
-		event_firsttrans_box->geometry().width()+5,140,
+		event_firsttrans_box->geometry().width()+5,162,  // lindon: +22
 		labelFontMetrics()->horizontalAdvance(tr("transition.")),20);
   // Default Transition Type
   event_defaulttrans_label->
-    setGeometry(5,161,
+    setGeometry(5,183,  // lindon: +22
 		labelFontMetrics()->horizontalAdvance(event_defaulttrans_label->text()+" "),
 		20);
   event_defaulttrans_box->
     setGeometry(event_defaulttrans_label->geometry().x()+
-		event_defaulttrans_label->geometry().width(),161,90,20);
+		event_defaulttrans_label->geometry().width(),183,90,20);  // lindon: +22
   event_defaulttrans_unit->
     setGeometry(event_defaulttrans_box->geometry().x()+
-		event_defaulttrans_box->geometry().width()+5,161,
+		event_defaulttrans_box->geometry().width()+5,183,  // lindon: +22
 		labelFontMetrics()->horizontalAdvance(tr("transition.")),20);
 
   //
   // Enforcing Length Section
   //
   event_autofill_group->
-    setGeometry(0,188,sizeHint().width()-15,43);
-  event_autofill_box->setGeometry(5,210,15,15);
-  event_autofill_label->setGeometry(25,210,150,15);
-  event_autofill_slop_box->setGeometry(200,210,15,15);
+    setGeometry(0,210,sizeHint().width()-15,43);  // lindon: +22
+  event_autofill_box->setGeometry(5,232,15,15);
+  event_autofill_label->setGeometry(25,232,150,15);
+  event_autofill_slop_box->setGeometry(200,232,15,15);
   event_autofill_slop_label1->
-    setGeometry(220,210,
+    setGeometry(220,232,
 		labelFontMetrics()->horizontalAdvance(event_autofill_slop_label1->text()),
 		15);
   event_autofill_slop_label->
     setGeometry(event_autofill_slop_label1->geometry().x()+
-	   event_autofill_slop_label1->geometry().width(),210,
+	   event_autofill_slop_label1->geometry().width(),232,
 	   labelFontMetrics()->horizontalAdvance(event_autofill_slop_label->text()+" "),15);
   event_autofill_slop_edit->
     setGeometry(event_autofill_slop_label->geometry().x()+
-		event_autofill_slop_label->geometry().width(),207,60,22);
-  event_timescale_box->setGeometry(240,210,15,15);
-  event_timescale_label->setGeometry(260,214,150,15);
+		event_autofill_slop_label->geometry().width(),229,60,22);
+  event_timescale_box->setGeometry(240,232,15,15);
+  event_timescale_label->setGeometry(260,236,150,15);
 
   //
   // Cart Stack Section
   //
   event_stack_group->
-    setGeometry(0,235,sizeHint().width()-15,size().height()-235);
+    setGeometry(0,257,sizeHint().width()-15,size().height()-257);  // lindon: +22
 
   //
   // Pre-Import Carts Section
   //
-  int events_h=(size().height()-235-106)/2;
+  int events_h=(size().height()-257-106)/2;  // lindon: +22
 
   event_preimport_widget->
-    setGeometry(0,250,event_preimport_widget->sizeHint().width(),events_h);
+    setGeometry(0,272,event_preimport_widget->sizeHint().width(),events_h);  // lindon: +22
 
   //
   // Imports Section
   //
-  int import_y=250+events_h-15;
+  int import_y=272+events_h-15;  // lindon: +22
 
   event_imports_label->setGeometry(5,import_y+3,200,16);
   event_source_none_radio->setGeometry(70,import_y+3,15,15);

@@ -1012,19 +1012,25 @@ QString RDEventLine::propertiesText(int prepos_msec,
   }
 
   if(time_type==RDLogLine::Hard) {
-    switch(grace_msec) {
-    case 0:
-      ret+=QObject::tr("Timed(Start), ");
-      break;
+    if(grace_msec<=-2) {   // lindon: Make Next && Wait max <timeout>
+      ret+=", "+QObject::tr("Timed(MakeNextWait)")+" "+
+	QTime(0,0,0).addMSecs(-grace_msec-2).toString("mm:ss")+", ";
+    }
+    else {
+      switch(grace_msec) {
+      case 0:
+	ret+=QObject::tr("Timed(Start), ");
+	break;
 
-    case -1:
-      ret+=QObject::tr("Timed(MakeNext), ");
-      break;
+      case -1:
+	ret+=QObject::tr("Timed(MakeNext), ");
+	break;
 
-    default:
-      ret+=", "+QObject::tr("Timed(Wait)")+" "+
-	QTime(0,0,0).addMSecs(grace_msec).toString("mm:ss")+", ";
-      break;
+      default:
+	ret+=", "+QObject::tr("Timed(Wait)")+" "+
+	  QTime(0,0,0).addMSecs(grace_msec).toString("mm:ss")+", ";
+	break;
+      }
     }
   }
 
