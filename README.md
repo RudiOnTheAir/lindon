@@ -2,7 +2,7 @@
 
 A private, trimmed fork of [Rivolution](https://github.com/anjeleno/rivolution)
 (itself a Qt6 fork of [Rivendell](https://github.com/ElvishArtisan/rivendell)),
-maintained for use at Radio Ostfriesland / Radio Rudi.
+maintained for use at some local radio stations, both fm and dab+ transmitted.
 
 Not a public project — kept private intentionally. This README exists
 for our own future reference as much as anything else.
