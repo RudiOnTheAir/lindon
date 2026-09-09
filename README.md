@@ -62,6 +62,70 @@ fixed that we ran into ourselves.
   via `dlopen()` at runtime rather than linked, so their absence
   doesn't show up via `ldd` and wasn't caught by upstream's own
   packaging; without them, MP3/MPEG import silently fails.
+- **Renamed from `rivolution` to `lindon` at the package level**
+  (`Conflicts:`/`Replaces:` against every old `rivolution-*` package
+  for a clean `apt` upgrade). Internal paths went the other way —
+  `/usr/share/rivolution/`, our own systemd units
+  (`rivolution-stack.target`, `rivolution.conf`) — reverted back to
+  plain `rivendell` naming, since there's no benefit to a third naming
+  scheme once the package itself already says `lindon`, and it keeps
+  the diff surface smaller if anything here is ever worth pulling back
+  upstream. Two things this surfaced, worth knowing if you're doing
+  the same kind of rename elsewhere:
+  - `postinst`'s fresh-install-vs-upgrade branch keyed only on
+    `$OLD_VERSION` (set by dpkg for a same-name package upgrade).
+    dpkg leaves that empty for a `Replaces:`-triggered rename, even
+    with a fully working install already in place — the very first
+    `rivolution`→`lindon` install would otherwise have hit the
+    fresh-install branch and dropped the production database
+    (`drop database if exists ...`). Now also checks for a
+    pre-existing `/etc/rivendell.d/rd-default.conf` before deciding.
+  - A `PYPAD_INSTANCES.SCRIPT_PATH` value written before the rename
+    doesn't update itself — it's just a string frozen in the
+    database at creation time, unaffected by anything the newly
+    installed package changes. Existing PyPAD instances need their
+    script path corrected by hand after an upgrade; new ones created
+    afterward pick up the right path automatically (RDAdmin's file
+    picker defaults into `RD_PYPAD_SCRIPT_DIR`, compiled from the
+    current package).
+  - `rivolution.conf` under `rivendell.service.d/` isn't a
+    dpkg-tracked conffile (just `cp`'d in by `postinst`, same as
+    `rivendell.conf` that replaces it) — dpkg has no reason to remove
+    it on upgrade, so it's left sitting alongside the new
+    `rivendell.conf` unless removed by hand.
+- **New: "Make Next & Wait max" grace-time mode**, a fourth option
+  alongside vanilla's Start Immediately / Make Next / Wait up to
+  (`rdairplay`, `rdlogedit`, and `rdlogmanager`'s clock/event editor).
+  Reserves the "next" slot immediately like Make Next (so the log
+  doesn't fall through to whatever else happens to be next in a
+  busy/segue-chained clock — e.g. a news slot skipping straight to
+  the wrong interstitial instead of joining the current segue chain),
+  but still enforces a bounded timeout like Wait up to, so an
+  overrunning predecessor can't push a hard-timed element (news,
+  legally-timed IDs) past its deadline. Encoded as `GRACE_TIME <= -2`
+  (`timeout_ms = -GRACE_TIME - 2`); no database schema change.
+  Two bugs found and fixed while building it, both worth remembering:
+  - `RDLogPlay::transTimerData()`: `makeNext()` calls
+    `SetTransTimer()` internally, which can silently reassign the
+    *member* `play_trans_line` to whatever the next upcoming
+    hard-time line is. Reading that member again afterward (instead
+    of the function's own pre-captured local `trans_line`, which
+    exists for exactly this reason and is already used elsewhere in
+    the function) armed the grace timer for the wrong log line —
+    the symptom was a hard-timed element several lines away getting
+    force-started instead of the one actually configured, skipping
+    everything in between.
+  - Two separate, unrelated display bugs made a correctly-saved
+    value look wrong without actually being wrong:
+    `EventWidget::load()` (`rdlogmanager`) lost the `grace=
+    event_event->graceTime()` assignment when its `switch` was
+    restructured to add the new branch, so re-opening any Hard-Time
+    event always showed "Start Immediately" regardless of what was
+    saved. `RDEventLine::propertiesText()` didn't know about the new
+    `GRACE_TIME <= -2` range and ran it through the old `Wait up to`
+    formatting path, where `QTime::addMSecs()` wraps a sufficiently
+    negative value around a 24-hour clock — a 2:00 timeout rendered
+    as a nonsensical "57:59" in the RDLogManager event list.
 - **`lindon-install.sh`** — a setup wrapper (not part of upstream)
   that creates the `rd` operator account, configures desktop
   autologin (preferring X11 over Wayland — SPICE console access via
@@ -82,6 +146,25 @@ sudo ./lindon-install.sh
 The operator account is always named `rd` — see the comments in
 `lindon-install.sh` for why, and what to do if you need something
 else.
+
+### Upgrading an existing `rivolution` install
+
+Don't run `lindon-install.sh` for this — it's a first-run wrapper
+(account creation, autologin setup, NFS export/mount, database
+pointer setup) that a working install has already been through.
+Install the packages directly instead:
+
+```bash
+sudo apt install lindon_*.deb lindon-*.deb
+```
+
+`Conflicts:`/`Replaces:` handles removing the old `rivolution-*`
+packages as part of the same transaction — review `apt`'s summary
+before confirming, it should show the matching set of `rivolution-*`
+packages being removed. Back up the database first regardless
+(`mysqldump --all-databases > backup.sql`) — see the `PYPAD_INSTANCES`
+and `rivolution.conf` notes above for what still needs manual cleanup
+after an upgrade.
 
 ## Remotes / staying current
 
