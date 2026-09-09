@@ -383,15 +383,15 @@ opsguide.pdf:	$(OPSGUIDE_DEPS) ../../versions/PACKAGE_VERSION\
 	xsltproc ../stylesheets/book-fo.xml opsguide.xml | JAVA_TOOL_OPTIONS="-XX:-TieredCompilation" fop - -pdf opsguide.pdf
 
 install-exec-local:
-	mkdir -p $(DESTDIR)$(prefix)/share/rivolution/html
-	cp opsguide.pdf $(DESTDIR)$(prefix)/share/rivolution/
-	cp $(OPSGUIDE_HTML) $(DESTDIR)$(prefix)/share/rivolution/html/
-	cp $(OPSGUIDE_IMAGES) $(DESTDIR)$(prefix)/share/rivolution/html/
-	cp $(OPSGUIDE_ICONS) $(DESTDIR)$(prefix)/share/rivolution/html/
+	mkdir -p $(DESTDIR)$(prefix)/share/rivendell/html
+	cp opsguide.pdf $(DESTDIR)$(prefix)/share/rivendell/
+	cp $(OPSGUIDE_HTML) $(DESTDIR)$(prefix)/share/rivendell/html/
+	cp $(OPSGUIDE_IMAGES) $(DESTDIR)$(prefix)/share/rivendell/html/
+	cp $(OPSGUIDE_ICONS) $(DESTDIR)$(prefix)/share/rivendell/html/
 
 uninstall-local:
-	rm -rf $(DESTDIR)$(prefix)/share/rivolution/html
-	rm -rf $(DESTDIR)$(prefix)/share/rivolution/opsguide.pdf
+	rm -rf $(DESTDIR)$(prefix)/share/rivendell/html
+	rm -rf $(DESTDIR)$(prefix)/share/rivendell/opsguide.pdf
 
 all-local:	$(OPSGUIDE_HTML) \
                 $(OPSGUIDE_IMAGES) \

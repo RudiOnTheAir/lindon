@@ -35,6 +35,6 @@ pcm.jack {
 			@func refer
 			name defaults.namehint.basic
 		}
-		description "JACK Audio Connection Kit (Rivolution: caed -> Stereo Tool -> ffmpeg)"
+		description "JACK Audio Connection Kit (Rivendell: caed -> Stereo Tool -> ffmpeg)"
 	}
 }

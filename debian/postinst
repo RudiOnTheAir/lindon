@@ -1,5 +1,5 @@
 #!/bin/sh
-# postinst script for Rivolution
+# postinst script for Rivendell
 set -e
 
 case "$1" in
@@ -77,7 +77,7 @@ case "$1" in
 	  # postinst automation, corrected here.
 	  rd_home=$(getent passwd rd | cut -d: -f6)
 	  if test -n "$rd_home" && test -d "$rd_home" && test ! -e "$rd_home/.asoundrc" ; then
-	      cp /usr/share/rivolution/alsa/rd.asoundrc "$rd_home/.asoundrc"
+	      cp /usr/share/rivendell/alsa/rd.asoundrc "$rd_home/.asoundrc"
 	      chown rd:rd "$rd_home/.asoundrc" 2>/dev/null || true
 	  fi
 
@@ -144,7 +144,7 @@ case "$1" in
 	  chmod 775 /etc/rivendell.d
       fi
       if test ! -e /etc/rd.conf ; then
-	  cp /usr/share/rivolution/rd.conf-sample /etc/rivendell.d/rd-default.conf
+	  cp /usr/share/rivendell/rd.conf-sample /etc/rivendell.d/rd-default.conf
 	  ln -s /etc/rivendell.d/rd-default.conf /etc/rd.conf
       fi
       if test ! -h /etc/rd.conf ; then
@@ -152,17 +152,25 @@ case "$1" in
 	  ln -s /etc/rivendell.d/rd-default.conf /etc/rd.conf
       fi
       if test ! -e /etc/profile.d/rivendell-env.sh ; then
-	 cp /usr/share/rivolution/rivendell-env.sh /etc/profile.d/
+	 cp /usr/share/rivendell/rivendell-env.sh /etc/profile.d/
       fi
 
       # Database: a fresh install creates and seeds an empty database
-      # (mirrors scripts/rivolution-first-run.sh, folded in here so a
+      # (mirrors scripts/rivendell-first-run.sh, folded in here so a
       # .deb install needs no separate manual step); an upgrade only
       # migrates the schema against the existing database. This must run
       # -- and on upgrade, complete -- before rivendell.service is
       # restarted below: a schema/binary version mismatch hard-blocks
       # startup (rdcoreapplication.cpp:240).
-      if test -z "$OLD_VERSION" ; then
+      # lindon: also check for a pre-existing config file, not just
+      # $OLD_VERSION -- dpkg only fills $OLD_VERSION when it considers
+      # this an upgrade of the *same* package name. The very first
+      # rivolution->lindon install (via Conflicts:/Replaces:) is a fresh
+      # install from dpkg's point of view, even though a fully working
+      # rivolution database and config already exist. Without this check,
+      # that first install would hit the branch below and destroy the
+      # production database (drop database if exists ...).
+      if test -z "$OLD_VERSION" && test ! -e /etc/rivendell.d/rd-default.conf ; then
 	  rd_conf_real=/etc/rivendell.d/rd-default.conf
 
 	  mysql_pass=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32)
@@ -209,23 +217,23 @@ LIMITS
 
       #
       # Broadcast/PipeWire/rivapi runtime layer (specs 0007/0008/0010).
-      # Staged files copied from /usr/share/rivolution/ into their real
+      # Staged files copied from /usr/share/rivendell/ into their real
       # /etc destinations, same pattern as rd.conf-sample above.
       #
       mkdir -p /etc/systemd/system/rivendell.service.d
-      cp /usr/share/rivolution/systemd/rivolution-stack.target /etc/systemd/system/
-      cp /usr/share/rivolution/systemd/rivendell.service.d/rivolution.conf /etc/systemd/system/rivendell.service.d/
+      cp /usr/share/rivendell/systemd/rivendell-stack.target /etc/systemd/system/
+      cp /usr/share/rivendell/systemd/rivendell.service.d/rivendell.conf /etc/systemd/system/rivendell.service.d/
       # rd's UID varies between machines even though the username is
       # always the same; resolve it now so rivendell.service's
-      # user@<uid>.service binding (see rivolution.conf) is valid before
+      # user@<uid>.service binding (see rivendell.conf) is valid before
       # the restart below.
       if getent passwd rd >/dev/null; then
 	  rd_uid=$(id -u rd)
-	  sed -i "s/%OPERATOR_UID%/$rd_uid/g" /etc/systemd/system/rivendell.service.d/rivolution.conf
+	  sed -i "s/%OPERATOR_UID%/$rd_uid/g" /etc/systemd/system/rivendell.service.d/rivendell.conf
       fi
 
       # liquidsoap.service is fully decommissioned (replaced by the
-      # ffmpeg-based rivolution-task-* stream services) -- clean up a
+      # ffmpeg-based rivendell-task-* stream services) -- clean up a
       # leftover install from before this was removed, so an upgrade
       # doesn't leave a Wants=liquidsoap.service target still able to
       # resurrect a dead unit. Safe to always attempt: a no-op on any
@@ -234,18 +242,18 @@ LIMITS
       rm -f /etc/systemd/system/liquidsoap.service
       rm -rf /etc/systemd/system/liquidsoap.service.d
 
-      cp /usr/share/rivolution/udev/99-ptp.rules /etc/udev/rules.d/
+      cp /usr/share/rivendell/udev/99-ptp.rules /etc/udev/rules.d/
       udevadm control --reload-rules
       udevadm trigger
 
       systemctl daemon-reload
 
       # PipeWire itself is user-scope here (see rivendell.service.d/
-      # rivolution.conf), started automatically as part of the operator's
+      # rivendell.conf), started automatically as part of the operator's
       # desktop session (autologin) rather than as a system-scope unit --
       # rivendell.service is bound to that user session's user@<uid>.service
       # via the drop-in, so ordering is enforced there, not here.
-      systemctl enable rivolution-stack.target
+      systemctl enable rivendell-stack.target
 
       /bin/systemctl restart rivendell
       /bin/systemctl enable rivendell
@@ -265,7 +273,7 @@ LIMITS
       fi
       if test ! -f /var/www/rd-bin/logos/webget_logo.png ; then
 	  mkdir -p /var/www/rd-bin/logos
-	  cp -f /usr/share/rivolution/logos/webget_logo.png /var/www/rd-bin/logos/webget_logo.png
+	  cp -f /usr/share/rivendell/logos/webget_logo.png /var/www/rd-bin/logos/webget_logo.png
       fi
 
       mkdir -p /var/log/rivendell
@@ -278,7 +286,7 @@ LIMITS
       chmod 640 /var/log/rivendell/debug
       chown syslog:adm /var/log/rivendell/debug
       if test ! -e /etc/rsyslog.d/10-rivendell.conf ; then
-	  cp /usr/share/rivolution/syslog.conf-sample /etc/rsyslog.d/10-rivendell.conf
+	  cp /usr/share/rivendell/syslog.conf-sample /etc/rsyslog.d/10-rivendell.conf
       fi
       /bin/systemctl restart rsyslog
 

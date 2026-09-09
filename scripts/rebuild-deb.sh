@@ -22,7 +22,7 @@
 #      generated file dpkg-buildpackage actually reads just sits stale.
 #   4. Runs dpkg-buildpackage itself, parallelized across all cores.
 #
-# Run from anywhere: cd ~/dev/rivolution && scripts/rebuild-deb.sh
+# Run from anywhere: cd ~/dev/lindon && scripts/rebuild-deb.sh
 #
 # Pass --no-bump to skip step 1 and build the revision already
 # committed in debian/changelog.src/control.src as-is -- used by CI,
@@ -105,8 +105,8 @@ fi
 
 echo "==> Removing stray built package files in $PARENT_DIR"
 find "$PARENT_DIR" -maxdepth 1 -type f \
-  \( -name "rivolution*.deb" -o -name "rivolution*.ddeb" \
-     -o -name "rivolution*.buildinfo" -o -name "rivolution*.changes" \) \
+  \( -name "lindon*.deb" -o -name "lindon*.ddeb" \
+     -o -name "lindon*.buildinfo" -o -name "lindon*.changes" \) \
   -print -delete
 
 echo "==> Cleaning debian/ build-tree artifacts"
@@ -135,7 +135,7 @@ echo "==> Building (DEBUILD_MAKE_ARGS=\"-j$(nproc)\")"
 DEBUILD_MAKE_ARGS="-j$(nproc)" dpkg-buildpackage -us -uc -b
 
 echo "==> Done. Packages in $PARENT_DIR:"
-ls -la "$PARENT_DIR"/rivolution*.deb
+ls -la "$PARENT_DIR"/lindon*.deb
 
 if [[ "$(cat versions/PACKAGE_VERSION)" == *"~"* ]]; then
   echo
@@ -143,5 +143,5 @@ if [[ "$(cat versions/PACKAGE_VERSION)" == *"~"* ]]; then
   echo "    asset filenames. When writing wget/apt install commands in the"
   echo "    release notes, use the GitHub-safe form instead of the real"
   echo "    Debian version above, e.g.:"
-  echo "      $(basename "$(ls "$PARENT_DIR"/rivolution_*.deb | head -1)" | sed 's/~/./')"
+  echo "      $(basename "$(ls "$PARENT_DIR"/lindon_*.deb | head -1)" | sed 's/~/./')"
 fi

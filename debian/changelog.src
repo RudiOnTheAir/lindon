@@ -1,24 +1,41 @@
-rivolution (@VERSION@-6+lindon4) unstable; urgency=medium
+lindon (@VERSION@-1) unstable; urgency=medium
 
-  * Beta release (see ChangeLog for details)
-  * Added mariadb-server to rivolution's Depends -- postinst's database
-    provisioning needs a running mysqld, previously not guaranteed
-  * pipewire-jack is now a hard Depends, not an alternative with
-    libjack-jackd2-0 -- apt was satisfying it with the wrong package
-  * postinst now copies pipewire-jack's ld.so.conf.d snippet into place
-    before renaming it; it was never auto-installed there to begin with
-  * Added gedit to Depends
-  * postinst no longer calls dpkg-architecture (a dpkg-dev build tool,
-    not present on a plain install target) -- multiarch triplet now
-    read from the filesystem instead
-  * Added libasound2-plugins to Depends -- Stereo Tool's ALSA jack PCM
-    plugin, previously missing entirely
-  * postinst deploys conf/alsa/rd.asoundrc to ~/.asoundrc again --
-    still required underneath /patchbay's dynamic routing, not
-    superseded by it
-  * postinst adds rd to the rivendell group -- /var/snd is
-    rivendell:rivendell mode 775, and rd (the account caed/rdimport
-    actually run as) was never a member, so audio import failed
-    outright with no destination write access
+  * Renamed package from rivolution to lindon (Conflicts:/Replaces:
+    against the old rivolution-* packages for a clean upgrade path).
+    Debian revision numbering restarts at 1 under the new package
+    identity -- "-6" would falsely imply six prior lindon builds when
+    none existed before this one.
+  * Dropped the "+lindonN" version suffix entirely -- redundant now
+    that the package itself is named lindon, and it broke
+    rebuild-deb.sh's own revision auto-bump regex, which expects the
+    Debian revision digits directly before the closing paren.
+  * Internal paths/strings reverted from /usr/share/rivolution/ etc.
+    back to vanilla /usr/share/rivendell/ convention; own systemd units
+    renamed accordingly (rivolution-stack.target -> rivendell-stack.target,
+    rivolution.conf -> rivendell.conf).
+  * postinst: fixed database-wipe risk on first rivolution->lindon
+    install -- dpkg leaves $OLD_VERSION empty for a Replaces:-triggered
+    package-name change, which would otherwise hit the fresh-install
+    branch and drop the existing production database. Now also checks
+    for a pre-existing /etc/rivendell.d/rd-default.conf before deciding.
+  * New: fourth "Action If Previous Event Still Playing" mode across
+    rdairplay, rdlogedit and rdlogmanager: "Make Next & Wait max".
+    Combines immediate makeNext() (like "Make Next") with a bounded
+    safety timeout (like "Wait up to"), avoiding both the too-short
+    interstitial problem of plain "Wait up to" on segue-chained clocks
+    and the unbounded wait of plain "Make Next". Encoding: GRACE_TIME
+    <= -2, timeout_ms = -GRACE_TIME - 2. No database schema change.
+  * Fixed a latent side-effect bug in RDLogPlay::transTimerData():
+    makeNext() internally calls SetTransTimer(), which can silently
+    overwrite the play_trans_line member. The new branch now uses the
+    pre-captured local trans_line consistently, matching the existing
+    defensive pattern already used elsewhere in the function.
+  * Fixed grace-time display bugs: EventWidget::load() (rdlogmanager)
+    lost the assignment from event_event->graceTime() during a
+    refactor, always showing "Start Immediately" regardless of the
+    saved value; RDEventLine::propertiesText() (lib/rdevent_line.cpp)
+    didn't know about the new GRACE_TIME <= -2 encoding and rendered
+    it as a bogus wrapped-around QTime (e.g. "57:59" for a 2:00
+    timeout) in the RDLogManager event list.
 
- -- Anjeleno <la90046@gmail.com>  @DATESTAMP@
+ -- RudiOnTheAir <newsletter@schwoon.info>  @DATESTAMP@

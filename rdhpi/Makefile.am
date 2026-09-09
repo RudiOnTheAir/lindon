@@ -1,6 +1,6 @@
 ## Makefile.am
 ##
-## Automake.am for rivolution/mlhpi
+## Automake.am for rivendell/mlhpi
 ##
 ## by Fred Gleason <fredg@paravelsystems.com>
 ##
@@ -36,13 +36,13 @@ html_%.cpp:	%.html
 
 # I18N Stuff
 install-exec-local:	
-	../helpers/rdi18n_helper.sh --install rdhpi $(DESTDIR)$(prefix)/share/rivolution
+	../helpers/rdi18n_helper.sh --install rdhpi $(DESTDIR)$(prefix)/share/rivendell
 
 uninstall-local:	
-	../helpers/rdi18n_helper.sh --uninstall rdhpi $(DESTDIR)$(prefix)/share/rivolution
+	../helpers/rdi18n_helper.sh --uninstall rdhpi $(DESTDIR)$(prefix)/share/rivendell
 
 all:	
-	../helpers/rdi18n_helper.sh --update rdhpi $(DESTDIR)$(prefix)/share/rivolution
+	../helpers/rdi18n_helper.sh --update rdhpi $(DESTDIR)$(prefix)/share/rivendell
 
 lib_LTLIBRARIES = librdhpi.la
 dist_librdhpi_la_SOURCES = rdhpiinformation.cpp rdhpiinformation.h\

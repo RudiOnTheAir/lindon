@@ -28,13 +28,13 @@ moc_%.cpp:	%.h
 
 # I18N Stuff
 install-exec-local:	
-	../helpers/rdi18n_helper.sh --install rdlogmanager $(DESTDIR)$(prefix)/share/rivolution
+	../helpers/rdi18n_helper.sh --install rdlogmanager $(DESTDIR)$(prefix)/share/rivendell
 
 uninstall-local:	
-	../helpers/rdi18n_helper.sh --uninstall rdlogmanager $(DESTDIR)$(prefix)/share/rivolution
+	../helpers/rdi18n_helper.sh --uninstall rdlogmanager $(DESTDIR)$(prefix)/share/rivendell
 
 all:	
-	../helpers/rdi18n_helper.sh --update rdlogmanager $(DESTDIR)$(prefix)/share/rivolution
+	../helpers/rdi18n_helper.sh --update rdlogmanager $(DESTDIR)$(prefix)/share/rivendell
 
 bin_PROGRAMS = rdlogmanager
 

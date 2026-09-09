@@ -34,7 +34,7 @@
 
 // Row 0 is a synthetic "PipeWire/JACK" entry, not backed by a real
 // RDAlsaCard -- real ALSA devices are rows 1..rowCount()-1 (i.e.
-// model_alsa_cards.at(row-1)). Selecting it is what tells Rivolution to
+// model_alsa_cards.at(row-1)). Selecting it is what tells Rivendell to
 // use the JACK driver instead of a specific ALSA device; it's never
 // written into the .asoundrc file saveConfig() produces, only reflected
 // in AUDIO_CARDS.DRIVER by the caller (see rdalsaconfig.cpp's

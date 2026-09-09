@@ -32,7 +32,7 @@
 # database server, or a database you're populating yourself) instead of
 # creating one locally.
 #
-# Run with: sudo bash rivolution-first-run.sh
+# Run with: sudo bash rivendell-first-run.sh
 
 set -e
 

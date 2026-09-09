@@ -59,169 +59,169 @@ binary-arch: build-arch
 	dh_installchangelogs ChangeLog
 
 #
-# rivolution-webapi
+# lindon-webapi
 #
-	mkdir -p debian/rivolution-webapi/usr/lib
-	mv debian/tmp/usr/lib/librivwebcapi.so.* debian/rivolution-webapi/usr/lib/
+	mkdir -p debian/lindon-webapi/usr/lib
+	mv debian/tmp/usr/lib/librivwebcapi.so.* debian/lindon-webapi/usr/lib/
 
 #
-# rivolution-importers
+# lindon-importers
 #
-	mkdir -p debian/rivolution-importers/usr/bin
-	mv debian/tmp/usr/bin/wings_filter debian/rivolution-importers/usr/bin/
-	mv debian/tmp/usr/bin/rivendell_filter debian/rivolution-importers/usr/bin/
-	mv debian/tmp/usr/bin/nexgen_filter debian/rivolution-importers/usr/bin/
-	mv debian/tmp/usr/bin/crc-unity4k.sh debian/rivolution-importers/usr/bin/
-	mv debian/tmp/usr/bin/rdcatch_copy debian/rivolution-importers/usr/bin/
-	mv debian/tmp/usr/bin/panel_copy debian/rivolution-importers/usr/bin/
+	mkdir -p debian/lindon-importers/usr/bin
+	mv debian/tmp/usr/bin/wings_filter debian/lindon-importers/usr/bin/
+	mv debian/tmp/usr/bin/rivendell_filter debian/lindon-importers/usr/bin/
+	mv debian/tmp/usr/bin/nexgen_filter debian/lindon-importers/usr/bin/
+	mv debian/tmp/usr/bin/crc-unity4k.sh debian/lindon-importers/usr/bin/
+	mv debian/tmp/usr/bin/rdcatch_copy debian/lindon-importers/usr/bin/
+	mv debian/tmp/usr/bin/panel_copy debian/lindon-importers/usr/bin/
 
 #
-# rivolution-opsguide
+# lindon-opsguide
 #
-	mkdir -p debian/rivolution-opsguide/usr/share/rivolution
-	mv debian/tmp/usr/share/rivolution/opsguide.pdf debian/rivolution-opsguide/usr/share/rivolution/
-	mv debian/tmp/usr/share/rivolution/html debian/rivolution-opsguide/usr/share/rivolution/
+	mkdir -p debian/lindon-opsguide/usr/share/rivendell
+	mv debian/tmp/usr/share/rivendell/opsguide.pdf debian/lindon-opsguide/usr/share/rivendell/
+	mv debian/tmp/usr/share/rivendell/html debian/lindon-opsguide/usr/share/rivendell/
 
 #
-# rivolution-dev
+# lindon-dev
 #
-	mkdir -p debian/rivolution-dev/usr/lib
-	mv debian/tmp/usr/lib/librivwebcapi.so debian/rivolution-dev/usr/lib/
-	mv debian/tmp/usr/lib/librivwebcapi.a debian/rivolution-dev/usr/lib/
-	mkdir -p debian/rivolution-dev/usr/share/pkgconfig
-	mv debian/tmp/usr/lib/pkgconfig/rivwebcapi.pc debian/rivolution-dev/usr/share/pkgconfig/
-	mkdir -p debian/rivolution-dev/usr/include
-	mv debian/tmp/usr/include/rivwebcapi debian/rivolution-dev/usr/include/
-	mkdir -p debian/rivolution-dev/usr/share/man/man7
-	mv debian/tmp/usr/share/man/man7/rd_addcart.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_addcut.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_addlog.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_assignschedcode.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_audioinfo.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_audiostore.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_copyaudio.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_createticket.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_deleteaudio.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_deletelog.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_deletepodcast.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_editcart.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_editcut.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_export.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_exportpeaks.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_getuseragent.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_getversion.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_import.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_listcart.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_listcartcuts.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_listcarts.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_listcartscuts.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_listcartschedcodes.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_listcut.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_listcuts.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_listgroup.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_listgroups.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_listlog.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_listlogs.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_listschedcodes.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_listservices.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_listsystemsettings.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_postimage.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_postpodcast.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_postrss.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_removecart.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_removecut.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_removeimage.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_removepodcast.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_removerss.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_savelog.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_savepodcast.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_trimaudio.7 debian/rivolution-dev/usr/share/man/man7/
-	mv debian/tmp/usr/share/man/man7/rd_unassignschedcode.7 debian/rivolution-dev/usr/share/man/man7/
-	mkdir -p debian/rivolution/usr/share/rivolution
-	cp conf/rd.conf-sample debian/rivolution/usr/share/rivolution/
-
-
-#
-# rivolution-select
-#
-	mkdir -p debian/rivolution-select/usr/bin
-	mv debian/tmp/usr/bin/rdselect debian/rivolution-select/usr/bin/
-	mv debian/tmp/usr/bin/rdselect_helper debian/rivolution-select/usr/bin/
-	mv debian/tmp/usr/bin/rdmonitor debian/rivolution-select/usr/bin/
-	mkdir -p debian/rivolution-select/etc/X11/xinit/xinitrc.d
-	mv debian/tmp/etc/X11/xinit/xinitrc.d/start-rdmonitor.sh debian/rivolution-select/etc/X11/xinit/xinitrc.d/
+	mkdir -p debian/lindon-dev/usr/lib
+	mv debian/tmp/usr/lib/librivwebcapi.so debian/lindon-dev/usr/lib/
+	mv debian/tmp/usr/lib/librivwebcapi.a debian/lindon-dev/usr/lib/
+	mkdir -p debian/lindon-dev/usr/share/pkgconfig
+	mv debian/tmp/usr/lib/pkgconfig/rivwebcapi.pc debian/lindon-dev/usr/share/pkgconfig/
+	mkdir -p debian/lindon-dev/usr/include
+	mv debian/tmp/usr/include/rivwebcapi debian/lindon-dev/usr/include/
+	mkdir -p debian/lindon-dev/usr/share/man/man7
+	mv debian/tmp/usr/share/man/man7/rd_addcart.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_addcut.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_addlog.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_assignschedcode.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_audioinfo.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_audiostore.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_copyaudio.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_createticket.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_deleteaudio.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_deletelog.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_deletepodcast.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_editcart.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_editcut.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_export.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_exportpeaks.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_getuseragent.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_getversion.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_import.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_listcart.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_listcartcuts.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_listcarts.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_listcartscuts.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_listcartschedcodes.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_listcut.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_listcuts.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_listgroup.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_listgroups.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_listlog.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_listlogs.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_listschedcodes.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_listservices.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_listsystemsettings.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_postimage.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_postpodcast.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_postrss.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_removecart.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_removecut.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_removeimage.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_removepodcast.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_removerss.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_savelog.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_savepodcast.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_trimaudio.7 debian/lindon-dev/usr/share/man/man7/
+	mv debian/tmp/usr/share/man/man7/rd_unassignschedcode.7 debian/lindon-dev/usr/share/man/man7/
+	mkdir -p debian/lindon/usr/share/rivendell
+	cp conf/rd.conf-sample debian/lindon/usr/share/rivendell/
 
 
 #
-# rivolution-webget
+# lindon-select
 #
-	mkdir -p debian/rivolution-webget/var/www/rd-bin
-	mv debian/tmp/var/www/rd-bin/webget.cgi debian/rivolution-webget/var/www/rd-bin/
-	mv debian/tmp/var/www/rd-bin/webget.js debian/rivolution-webget/var/www/rd-bin/
+	mkdir -p debian/lindon-select/usr/bin
+	mv debian/tmp/usr/bin/rdselect debian/lindon-select/usr/bin/
+	mv debian/tmp/usr/bin/rdselect_helper debian/lindon-select/usr/bin/
+	mv debian/tmp/usr/bin/rdmonitor debian/lindon-select/usr/bin/
+	mkdir -p debian/lindon-select/etc/X11/xinit/xinitrc.d
+	mv debian/tmp/etc/X11/xinit/xinitrc.d/start-rdmonitor.sh debian/lindon-select/etc/X11/xinit/xinitrc.d/
+
 
 #
-# rivolution
+# lindon-webget
 #
-	mkdir -p debian/rivolution
-	rsync -a debian/tmp/etc debian/rivolution/
+	mkdir -p debian/lindon-webget/var/www/rd-bin
+	mv debian/tmp/var/www/rd-bin/webget.cgi debian/lindon-webget/var/www/rd-bin/
+	mv debian/tmp/var/www/rd-bin/webget.js debian/lindon-webget/var/www/rd-bin/
+
+#
+# lindon
+#
+	mkdir -p debian/lindon
+	rsync -a debian/tmp/etc debian/lindon/
 	rm -rf debian/tmp/etc
-	rsync -a debian/tmp/lib debian/rivolution/
+	rsync -a debian/tmp/lib debian/lindon/
 	rm -rf debian/tmp/lib
-	rsync -a debian/tmp/usr debian/rivolution/
+	rsync -a debian/tmp/usr debian/lindon/
 	rm -rf debian/tmp/usr
-	rsync -a debian/tmp/var debian/rivolution/
+	rsync -a debian/tmp/var debian/lindon/
 	rm -rf debian/tmp/var
-	mkdir -p debian/rivolution/etc/logrotate.d
-	cp conf/logrotate-sample debian/rivolution/etc/logrotate.d/rivolution
-	mkdir -p debian/rivolution/usr/share/rivolution
-	cp conf/rivendell-env.sh debian/rivolution/usr/share/rivolution
-	mkdir -p debian/rivolution/usr/share/rivolution/logos
-	cp icons/webget_logo.png debian/rivolution/usr/share/rivolution/logos/
-	mkdir -p debian/rivolution/usr/share/pixmaps/rivolution
-	cp icons/rdairplay_skin.png debian/rivolution/usr/share/pixmaps/rivolution/
-	cp icons/rdpanel_skin.png debian/rivolution/usr/share/pixmaps/rivolution/
-	cp icons/rdairplay_logo.png debian/rivolution/usr/share/pixmaps/rivolution/
-	mkdir -p debian/rivolution/usr/share/doc/rivolution/logos
-	cp AUTHORS debian/rivolution/usr/share/doc/rivolution/
-	cp NEWS debian/rivolution/usr/share/doc/rivolution/
-	cp README debian/rivolution/usr/share/doc/rivolution/
-	cp UPGRADING debian/rivolution/usr/share/doc/rivolution/
-	cp CODINGSTYLE debian/rivolution/usr/share/doc/rivolution/
-	cp conf/*.conf debian/rivolution/usr/share/doc/rivolution/
-	cp conf/rd.conf-sample debian/rivolution/usr/share/doc/rivolution/rd.conf-sample
-	cp conf/asound.conf-sample debian/rivolution/usr/share/doc/rivolution/
-	mkdir -p debian/rivolution/usr/share/rivolution
-	cp conf/syslog.conf-sample debian/rivolution/usr/share/rivolution/
-	mkdir -p debian/rivolution/etc/fail2ban/filter.d
-	cp conf/rivendell-webapi.conf debian/rivolution/etc/fail2ban/filter.d/
-	mkdir -p debian/rivolution/usr/share/doc/rivolution/misc
-	cp docs/misc/colors debian/rivolution/usr/share/doc/rivolution/misc/
-	cp docs/misc/reports.txt debian/rivolution/usr/share/doc/rivolution/misc/
-	cp docs/misc/ALSA.txt debian/rivolution/usr/share/doc/rivolution/misc/
-	cp docs/misc/RDMONITOR.txt debian/rivolution/usr/share/doc/rivolution/misc/
-	cp docs/misc/scheduler_formats.ods debian/rivolution/usr/share/doc/rivolution/misc/
-	cp docs/misc/ando_interface.odt debian/rivolution/usr/share/doc/rivolution/misc/
-	mkdir -p debian/rivolution/usr/lib/firewalld/services
-	cp conf/rivendell-firewalld.xml debian/rivolution/usr/lib/firewalld/services/rivolution.xml
-	mkdir -p debian/rivolution/usr/lib/rivolution/cdn
-	cp apis/cdn/scripts/aka_purge.sh debian/rivolution/usr/lib/rivolution/cdn/aka_purge.sh
-	cp apis/cdn/scripts/akamai_purge.cdn debian/rivolution/usr/lib/rivolution/cdn/akamai_purge.cdn
+	mkdir -p debian/lindon/etc/logrotate.d
+	cp conf/logrotate-sample debian/lindon/etc/logrotate.d/rivendell
+	mkdir -p debian/lindon/usr/share/rivendell
+	cp conf/rivendell-env.sh debian/lindon/usr/share/rivendell
+	mkdir -p debian/lindon/usr/share/rivendell/logos
+	cp icons/webget_logo.png debian/lindon/usr/share/rivendell/logos/
+	mkdir -p debian/lindon/usr/share/pixmaps/rivendell
+	cp icons/rdairplay_skin.png debian/lindon/usr/share/pixmaps/rivendell/
+	cp icons/rdpanel_skin.png debian/lindon/usr/share/pixmaps/rivendell/
+	cp icons/rdairplay_logo.png debian/lindon/usr/share/pixmaps/rivendell/
+	mkdir -p debian/lindon/usr/share/doc/rivendell/logos
+	cp AUTHORS debian/lindon/usr/share/doc/rivendell/
+	cp NEWS debian/lindon/usr/share/doc/rivendell/
+	cp README debian/lindon/usr/share/doc/rivendell/
+	cp UPGRADING debian/lindon/usr/share/doc/rivendell/
+	cp CODINGSTYLE debian/lindon/usr/share/doc/rivendell/
+	cp conf/*.conf debian/lindon/usr/share/doc/rivendell/
+	cp conf/rd.conf-sample debian/lindon/usr/share/doc/rivendell/rd.conf-sample
+	cp conf/asound.conf-sample debian/lindon/usr/share/doc/rivendell/
+	mkdir -p debian/lindon/usr/share/rivendell
+	cp conf/syslog.conf-sample debian/lindon/usr/share/rivendell/
+	mkdir -p debian/lindon/etc/fail2ban/filter.d
+	cp conf/rivendell-webapi.conf debian/lindon/etc/fail2ban/filter.d/
+	mkdir -p debian/lindon/usr/share/doc/rivendell/misc
+	cp docs/misc/colors debian/lindon/usr/share/doc/rivendell/misc/
+	cp docs/misc/reports.txt debian/lindon/usr/share/doc/rivendell/misc/
+	cp docs/misc/ALSA.txt debian/lindon/usr/share/doc/rivendell/misc/
+	cp docs/misc/RDMONITOR.txt debian/lindon/usr/share/doc/rivendell/misc/
+	cp docs/misc/scheduler_formats.ods debian/lindon/usr/share/doc/rivendell/misc/
+	cp docs/misc/ando_interface.odt debian/lindon/usr/share/doc/rivendell/misc/
+	mkdir -p debian/lindon/usr/lib/firewalld/services
+	cp conf/rivendell-firewalld.xml debian/lindon/usr/lib/firewalld/services/rivendell.xml
+	mkdir -p debian/lindon/usr/lib/rivendell/cdn
+	cp apis/cdn/scripts/aka_purge.sh debian/lindon/usr/lib/rivendell/cdn/aka_purge.sh
+	cp apis/cdn/scripts/akamai_purge.cdn debian/lindon/usr/lib/rivendell/cdn/akamai_purge.cdn
 
 #
 # broadcast/PipeWire/rivapi runtime layer (specs 0007/0008/0010) --
-# staged under /usr/share/rivolution/, same pattern as rd.conf-sample
+# staged under /usr/share/rivendell/, same pattern as rd.conf-sample
 # above; postinst copies each into its real /etc destination at
 # install time rather than these being dpkg-owned conffiles directly.
 #
-	mkdir -p debian/rivolution/usr/bin
-	mkdir -p debian/rivolution/usr/share/rivolution/systemd/rivendell.service.d
-	cp conf/systemd/rivolution-stack.target debian/rivolution/usr/share/rivolution/systemd/
-	cp conf/systemd/rivendell.service.d/rivolution.conf debian/rivolution/usr/share/rivolution/systemd/rivendell.service.d/
-	mkdir -p debian/rivolution/usr/share/rivolution/sudoers.d
-	mkdir -p debian/rivolution/usr/share/rivolution/udev
-	cp conf/udev/99-ptp.rules debian/rivolution/usr/share/rivolution/udev/
-	mkdir -p debian/rivolution/usr/share/rivolution/alsa
-	cp conf/alsa/rd.asoundrc debian/rivolution/usr/share/rivolution/alsa/
+	mkdir -p debian/lindon/usr/bin
+	mkdir -p debian/lindon/usr/share/rivendell/systemd/rivendell.service.d
+	cp conf/systemd/rivendell-stack.target debian/lindon/usr/share/rivendell/systemd/
+	cp conf/systemd/rivendell.service.d/rivendell.conf debian/lindon/usr/share/rivendell/systemd/rivendell.service.d/
+	mkdir -p debian/lindon/usr/share/rivendell/sudoers.d
+	mkdir -p debian/lindon/usr/share/rivendell/udev
+	cp conf/udev/99-ptp.rules debian/lindon/usr/share/rivendell/udev/
+	mkdir -p debian/lindon/usr/share/rivendell/alsa
+	cp conf/alsa/rd.asoundrc debian/lindon/usr/share/rivendell/alsa/
 
 	dh_strip_nondeterminism
 	dh_compress

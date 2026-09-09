@@ -80,7 +80,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PARENT_DIR="$(cd "$REPO_ROOT/.." && pwd)"
 cd "$REPO_ROOT"
 
-REPO_SLUG="anjeleno/rivolution"
+REPO_SLUG="RudiOnTheAir/lindon"
 
 REV="$(grep -oP '(?<=@VERSION@-)[0-9]+(?=\))' debian/changelog.src | head -1)"
 UPSTREAM_VERSION="$(cat versions/PACKAGE_VERSION)"
@@ -126,9 +126,9 @@ echo "==> ${PKG_VERSION} (tag ${TAG}), superseding ${PREV_TAG} (${PREV_TAG_DATE}
 
 echo "==> Finding built assets in $PARENT_DIR"
 mapfile -t ASSETS < <(find "$PARENT_DIR" -maxdepth 1 -type f \
-  \( -name "rivolution*_${PKG_VERSION}_*.deb" \
-     -o -name "rivolution_${PKG_VERSION}_*.buildinfo" \
-     -o -name "rivolution_${PKG_VERSION}_*.changes" \) \
+  \( -name "lindon*_${PKG_VERSION}_*.deb" \
+     -o -name "lindon_${PKG_VERSION}_*.buildinfo" \
+     -o -name "lindon_${PKG_VERSION}_*.changes" \) \
   ! -name "*-dbgsym*" | sort)
 
 if [[ ${#ASSETS[@]} -eq 0 ]]; then
@@ -173,11 +173,11 @@ else
     echo "## arm64 build"
     echo
     echo '```'
-    echo "wget https://github.com/${REPO_SLUG}/releases/download/${TAG}/rivolution_${DOT_VERSION}_arm64.deb"
+    echo "wget https://github.com/${REPO_SLUG}/releases/download/${TAG}/lindon_${DOT_VERSION}_arm64.deb"
     echo '```'
     echo
     echo '```'
-    echo "sudo apt install ./rivolution_${DOT_VERSION}_arm64.deb"
+    echo "sudo apt install ./lindon_${DOT_VERSION}_arm64.deb"
     echo '```'
   } > "$NOTES_FILE"
 fi

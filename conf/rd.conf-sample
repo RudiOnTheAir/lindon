@@ -254,7 +254,7 @@ TranscodingDelay=0
 JwtSecret=
 
 ; Optional display name shown in the dashboard navigation header.
-; Defaults to "Rivolution" if not set.
+; Defaults to "Rivendell" if not set.
 ;StationName=My Station
 
 ; Optional URL to a logo image displayed in the dashboard nav header.

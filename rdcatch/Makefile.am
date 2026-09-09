@@ -1,6 +1,6 @@
 ## Makefile.am
 ##
-## Automake.am for rivolution/rdcatch
+## Automake.am for rivendell/rdcatch
 ##
 ## (C) Copyright 2002-2022 Fred Gleason <fredg@paravelsystems.com>
 ##
@@ -30,13 +30,13 @@ moc_%.cpp:	%.h
 
 # I18N Stuff
 install-exec-local:	
-	../helpers/rdi18n_helper.sh --install rdcatch $(DESTDIR)$(prefix)/share/rivolution
+	../helpers/rdi18n_helper.sh --install rdcatch $(DESTDIR)$(prefix)/share/rivendell
 
 uninstall-local:	
-	../helpers/rdi18n_helper.sh --uninstall rdcatch $(DESTDIR)$(prefix)/share/rivolution
+	../helpers/rdi18n_helper.sh --uninstall rdcatch $(DESTDIR)$(prefix)/share/rivendell
 
 all:	
-	../helpers/rdi18n_helper.sh --update rdcatch $(DESTDIR)$(prefix)/share/rivolution
+	../helpers/rdi18n_helper.sh --update rdcatch $(DESTDIR)$(prefix)/share/rivendell
 
 bin_PROGRAMS = rdcatch
 

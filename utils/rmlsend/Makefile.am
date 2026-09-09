@@ -27,13 +27,13 @@ moc_%.cpp:	%.h
 
 # I18N Stuff
 install-exec-local:	
-	../../helpers/rdi18n_helper.sh --install rmlsend $(DESTDIR)$(prefix)/share/rivolution
+	../../helpers/rdi18n_helper.sh --install rmlsend $(DESTDIR)$(prefix)/share/rivendell
 
 uninstall-local:	
-	../../helpers/rdi18n_helper.sh --uninstall rmlsend $(DESTDIR)$(prefix)/share/rivolution
+	../../helpers/rdi18n_helper.sh --uninstall rmlsend $(DESTDIR)$(prefix)/share/rivendell
 
 all:	
-	../../helpers/rdi18n_helper.sh --update rmlsend $(DESTDIR)$(prefix)/share/rivolution
+	../../helpers/rdi18n_helper.sh --update rmlsend $(DESTDIR)$(prefix)/share/rivendell
 
 bin_PROGRAMS = rmlsend
 

@@ -1,6 +1,6 @@
 ## automake.am
 ##
-## Automake.am for rivolution/rdlibrary
+## Automake.am for rivendell/rdlibrary
 ##
 ## (C) Copyright 2002-2021 Fred Gleason <fredg@paravelsystems.com>
 ##
@@ -30,13 +30,13 @@ moc_%.cpp:	%.h
 
 # I18N Stuff
 install-exec-local:	
-	../helpers/rdi18n_helper.sh --install rdlibrary $(DESTDIR)$(prefix)/share/rivolution
+	../helpers/rdi18n_helper.sh --install rdlibrary $(DESTDIR)$(prefix)/share/rivendell
 
 uninstall-local:	
-	../helpers/rdi18n_helper.sh --uninstall rdlibrary $(DESTDIR)$(prefix)/share/rivolution
+	../helpers/rdi18n_helper.sh --uninstall rdlibrary $(DESTDIR)$(prefix)/share/rivendell
 
 all:	
-	../helpers/rdi18n_helper.sh --update rdlibrary $(DESTDIR)$(prefix)/share/rivolution
+	../helpers/rdi18n_helper.sh --update rdlibrary $(DESTDIR)$(prefix)/share/rivendell
 
 bin_PROGRAMS = rdlibrary
 

@@ -2,9 +2,9 @@
 #
 # lindon-install.sh
 #
-# Setup wrapper around the lindon (trimmed Rivolution) .deb packages.
+# Setup wrapper around the lindon (trimmed Rivendell) .deb packages.
 # Run as root, from the directory containing the built .deb files
-# (rivolution_*.deb, rivolution-*.deb -- *.ddeb debug packages are not
+# (lindon_*.deb, lindon-*.deb -- *.ddeb debug packages are not
 # needed and are ignored).
 #
 # What this does, roughly following Fred Gleason's own
@@ -59,7 +59,7 @@ function EnsureRdUser {
 
     echo
     echo "Creating the 'rd' operator account (this is the fixed account"
-    echo "name the whole lindon/Rivolution stack assumes -- rdairplay,"
+    echo "name the whole lindon/Rivendell stack assumes -- rdairplay,"
     echo "caed, the PipeWire session, /var/snd ownership, all of it)."
     echo
     echo "You'll be asked to set rd's password now. (Old Rivendell habit"
@@ -168,9 +168,9 @@ SDDM
 function InstallPackages {
     echo
     echo "Installing lindon packages from $SCRIPT_DIR ..."
-    debs=("$SCRIPT_DIR"/rivolution*.deb)
+    debs=("$SCRIPT_DIR"/lindon*.deb)
     if [ ! -e "${debs[0]}" ] ; then
-        echo "No rivolution*.deb files found in $SCRIPT_DIR, exiting."
+        echo "No lindon*.deb files found in $SCRIPT_DIR, exiting."
         exit 1
     fi
     apt -y install "${debs[@]}"
@@ -219,7 +219,7 @@ PWCONF
 # ---------------------------------------------------------------------
 # Step 4a: NFS export (server role)
 #
-# Follows Rivolution's own (proven) pattern: real directories are
+# Follows Rivendell's own (proven) pattern: real directories are
 # bind-mounted under /srv/nfs4/... and exported *from there*, not
 # exported directly. /var/snd itself is the one path lindon actually
 # needs to be present the instant the service starts, so it's handled
@@ -298,7 +298,7 @@ function SetupNfsServer {
 # Step 4b: NFS mount + remote DB pointer (client role)
 #
 # /var/snd: mounted immediately (needed right away) plus a persistent
-# fstab entry for reboot -- matches Rivolution's own approach, no
+# fstab entry for reboot -- matches Rivendell's own approach, no
 # autofs involved for this one path.
 #
 # import/share: autofs, on-demand -- these are occasional-use

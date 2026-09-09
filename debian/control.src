@@ -1,72 +1,85 @@
-Source: rivolution
+Source: lindon
 Section: audio
 Priority: optional
 Maintainer: Anjeleno <la90046@gmail.com>
-Build-Depends: debhelper-compat (= 12), autotools-dev, golang-go @HPKLINUX_DEP@
+Build-Depends: debhelper-compat (= 12), autotools-dev @HPKLINUX_DEP@
 Standards-Version: 4.4.1
 
-Package: rivolution
+Package: lindon
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, mariadb-server, mariadb-client, libqt6sql6-mysql, apache2, curl, rsyslog, python3, python3-pycurl, python3-mysqldb, python3-serial, python3-requests, icedax, xsltproc, pipewire-jack, ffmpeg, fdkaac, pipewire, wireplumber, gedit, libasound2-plugins, mp3gain, libmad0, libtwolame0
 Recommends: vlc, vlc-plugin-jack
-Replaces: rivolution-pypad
+Replaces: rivolution-pypad, rivolution
+Conflicts: rivolution
 Description: Radio Broadcast Automation System
- Rivolution is a complete radio broadcast automation solution, with
+ lindon is a complete radio broadcast automation solution, with
  facilities for the acquisition, management, scheduling and playout of
  audio content.  Modules for the production and management of podcast
  audio are also included.
 
-Package: rivolution-importers
+Package: lindon-importers
 Architecture: any
-Depends: ${misc:Depends}, rivolution (= ${binary:Version})
-Description: Library importers for the Rivolution Broadcast Automation System
+Depends: ${misc:Depends}, lindon (= ${binary:Version})
+Replaces: rivolution-importers
+Conflicts: rivolution-importers
+Description: Library importers for the Rivendell Broadcast Automation System
  This package contains various importer scripts, which can be used to
- import audio from existing legacy automation systems into Rivolution.
+ import audio from existing legacy automation systems into Rivendell.
  Currently, scripts exist for the AirForce Wings, Prophet NexGen and Sierra
- Automated Systems SASAuto systems, as well as from another Rivolution system
+ Automated Systems SASAuto systems, as well as from another Rivendell system
  (useful for 'merging' multiple databases).  Additionally, scripts for
  initializing switcher matrices for the Christian Radio Consortium
  (CRC) Unity4000 network and copying RDCatch event lists between hosts
  are included.
 
-Package: rivolution-opsguide
+Package: lindon-opsguide
 Architecture: all
 Depends: ${misc:Depends}
-Description: Rivolution Operations and Administration Guide
- This package contains the Rivolution Operations and Administration Guide,
+Replaces: rivolution-opsguide
+Conflicts: rivolution-opsguide
+Description: lindon Operations and Administration Guide
+ This package contains the lindon Operations and Administration Guide,
  in both HTML and PDF formats.
 
-Package: rivolution-webapi
+Package: lindon-webapi
 Architecture: any
 Depends:  ${shlibs:Depends}, ${misc:Depends}
-Description: Client libraries for interfacing with Rivolution's C Web API.
- This package contains client libraries for interfacing with Rivolution's
+Replaces: rivolution-webapi
+Conflicts: rivolution-webapi
+Description: Client libraries for interfacing with Rivendell's C Web API.
+ This package contains client libraries for interfacing with Rivendell's
  C Web API subsystem.
 
-Package: rivolution-dev
+Package: lindon-dev
 Architecture: any
-Depends: ${misc:Depends}, rivolution-webapi (= ${binary:Version})
-Description: Header files and example code for development with Rivolution C API
+Depends: ${misc:Depends}, lindon-webapi (= ${binary:Version})
+Replaces: rivolution-dev
+Conflicts: rivolution-dev
+Description: Header files and example code for development with Rivendell C API
  This package contains header files and example code for development using
- Rivolution's Web C API.
+ Rivendell's Web C API.
 
-Package: rivolution-select
+Package: lindon-select
 Architecture: any
-Depends: ${misc:Depends}, rivolution (= ${binary:Version})
-Description: The RDSelect system selector tool for Rivolution.
- This package contains the RDMonitor/RDSelect tool for Rivolution, which can
- be used to select which amoung multiple Rivolution instances a host should be
+Depends: ${misc:Depends}, lindon (= ${binary:Version})
+Replaces: rivolution-select
+Conflicts: rivolution-select
+Description: The RDSelect system selector tool for lindon.
+ This package contains the RDMonitor/RDSelect tool for lindon, which can
+ be used to select which amoung multiple lindon instances a host should be
  associated with.
 
-Package: rivolution-webget
+Package: lindon-webget
 Architecture: any
-Depends: ${misc:Depends}, rivolution (= ${binary:Version})
-Description: The WebGet audio fetcher service for Rivolution
- This package contains the WebGet audio fetching tool for Rivolution.
+Depends: ${misc:Depends}, lindon (= ${binary:Version})
+Replaces: rivolution-webget
+Conflicts: rivolution-webget
+Description: The WebGet audio fetcher service for lindon
+ This package contains the WebGet audio fetching tool for lindon.
 
 #Package: rivolution-pypad
 #Architecture: all
 #Depends: python3, python3-pycurl, python3-pymysql, python3-serial, python3-requests
-#Description: PyPAD Program Associated Data script system for Rivolution
-# This package contains Rivolution's PyPAD scripting system for transmitting
+#Description: PyPAD Program Associated Data script system for Rivendell
+# This package contains Rivendell's PyPAD scripting system for transmitting
 # Program Associated Data (PAD) using Python scripts.
