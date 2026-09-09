@@ -372,7 +372,12 @@ bool RDLogPlay::play(int line,RDLogLine::StartSource src,
   bool ret = false;
   int segue_length=0;
   if(src==RDLogLine::StartManual) {
-    rda->airplayConf()->segueLength();
+    // lindon: BUGFIX - the return value was being discarded, so
+    // segue_length stayed 0 no matter what "Manual/Forced Segue" was
+    // set to in RDAdmin. Manual segue starts (the per-line "Start"
+    // button in rdairplay) always cut in immediately instead of
+    // fading, regardless of the configured length.
+    segue_length=rda->airplayConf()->segueLength();
   }
   ret = StartEvent(line,RDLogLine::Segue,segue_length,src,mport);
   SetTransTimer(current_time);
