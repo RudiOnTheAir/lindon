@@ -1,4 +1,4 @@
-lindon (@VERSION@-1) unstable; urgency=medium
+lindon (@VERSION@-2) unstable; urgency=medium
 
   * Renamed package from rivolution to lindon (Conflicts:/Replaces:
     against the old rivolution-* packages for a clean upgrade path).
