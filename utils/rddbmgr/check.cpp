@@ -696,6 +696,15 @@ void MainObject::CheckCutCounts() const
 }
 
 
+// lindon: backport of ElvishArtisan/rivendell#1052. Without this,
+// AVERAGE_SEGUE_LENGTH (which feeds the Est. Time column in rdlogedit
+// and rdairplay) is only ever refreshed when a cart is individually
+// opened in rdlibrary -- everything else keeps whatever stale value it
+// had, so Est. Time can visibly disagree between the two programs, or
+// just be wrong, until every cart has been opened by hand once. Run
+// via `rddbmgr --check` (only when --all is also passed -- see the
+// db_check_all guard above), which walks the whole CART table and
+// calls RDCart::updateLength() on each audio cart to refresh it.
 void MainObject::RecalculateLengths() const
 {
   QString sql;

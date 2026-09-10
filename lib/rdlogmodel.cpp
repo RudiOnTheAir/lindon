@@ -799,6 +799,18 @@ QTime RDLogModel::blockStartTime(int line) const
   for(int i=start_line;i<line;i++) {
     if((i<(lineCount()+1))&&((logLine(i+1)->transType()==RDLogLine::Segue))) {
       if(logLine(i)->segueStartPoint(RDLogLine::LogPointer)<0) {
+          // lindon: ElvishArtisan/rivendell#1052 also changed this line
+          // to forcedLength()-averageSegueLength(), but that assumes
+          // vanilla's meaning of AVERAGE_SEGUE_LENGTH (GetPointerRange():
+          // the short tail length after the segue point). Rivolution
+          // redefines the same field via GetPreTransitionLength() to mean
+          // the full played duration up to the segue point instead --
+          // applying the vanilla formula unmodified against Rivolution's
+          // redefined field made Est. Time collapse to seconds instead of
+          // minutes on segue-heavy logs. Reverted to the original formula
+          // below; only RecalculateLengths() (check.cpp) was kept from
+          // the #1052 backport, since that part doesn't depend on which
+          // meaning of AVERAGE_SEGUE_LENGTH is in effect.
 	actual_length+=100*(logLine(i)->averageSegueLength()/100);
       }
       else {
