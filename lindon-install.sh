@@ -104,14 +104,55 @@ GDM
         # clipboard (guest-to-host paste)/resize/stability issues under
         # Wayland that don't reproduce under X11 -- but that only matters
         # on systems actually using SPICE, so ask rather than force it.
+        # lindon: detect what's already configured (if anything) so a
+        # re-run shows it and Enter just keeps it, instead of silently
+        # re-defaulting to X11 every single time this runs -- which is
+        # what happened before: a re-run after a mid-install failure
+        # (e.g. postinst erroring out downstream) would flip Wayland
+        # back to X11 even if that had been deliberately changed since.
+        current_session=$(grep -h '^Session=' /etc/sddm.conf /etc/sddm.conf.d/*.conf 2>/dev/null | tail -1 | cut -d= -f2)
+        case "$current_session" in
+            *x11*) current_is_x11=1 ;;
+            *) current_is_x11=0 ;;
+        esac
+
         echo
         echo "SPICE console access (e.g. via Proxmox) has known"
         echo "clipboard/resize/stability issues under Wayland that don't"
         echo "reproduce under X11. Doesn't matter if you're not using SPICE."
-        read -a X11_RESP -p "Prefer X11 over Wayland for the desktop session? (Y/n) "
-        echo
+        want_x11=""
+        if [ -n "$current_session" ] ; then
+            if [ "$current_is_x11" = "1" ] ; then
+                echo "Current desktop session: X11 ($current_session)"
+                read -a X11_RESP -p "Switch to Wayland instead? (y/N) "
+                echo
+                if [ "$X11_RESP" == "y" ] || [ "$X11_RESP" == "Y" ] ; then
+                    want_x11=0
+                else
+                    want_x11=1
+                fi
+            else
+                echo "Current desktop session: Wayland ($current_session)"
+                read -a X11_RESP -p "Switch to X11 instead? (y/N) "
+                echo
+                if [ "$X11_RESP" == "y" ] || [ "$X11_RESP" == "Y" ] ; then
+                    want_x11=1
+                else
+                    want_x11=0
+                fi
+            fi
+        else
+            read -a X11_RESP -p "Prefer X11 over Wayland for the desktop session? (Y/n) "
+            echo
+            if [ -z "$X11_RESP" ] || [ "$X11_RESP" == "y" ] || [ "$X11_RESP" == "Y" ] ; then
+                want_x11=1
+            else
+                want_x11=0
+            fi
+        fi
+
         session=""
-        if [ -z "$X11_RESP" ] || [ "$X11_RESP" == "y" ] || [ "$X11_RESP" == "Y" ] ; then
+        if [ "$want_x11" = "1" ] ; then
             # Kubuntu 26.04 no longer installs plasma-session-x11 by
             # default (Wayland-only out of the box) -- install it if an
             # X11 Plasma session isn't already present.
@@ -194,15 +235,40 @@ function InstallPackages {
 # ---------------------------------------------------------------------
 function ConfigureSampleRate {
     echo
+    # lindon: detect current state so a re-run shows it and Enter just
+    # keeps it, instead of asking the same fixed-default question every
+    # time regardless of what's already configured.
+    if [ -e /etc/pipewire/pipewire.conf.d/lindon-samplerate.conf ] && \
+       grep -q 'default.clock.rate = 44100' /etc/pipewire/pipewire.conf.d/lindon-samplerate.conf 2>/dev/null ; then
+        current_fixed=1
+    else
+        current_fixed=0
+    fi
+
     echo "PipeWire defaults to a dynamic sample rate (usually 48kHz) and"
     echo "resamples on the fly. caed expects a fixed 44.1kHz -- broadcast"
     echo "standard -- leaving it on 48kHz means constant resampling"
     echo "overhead and avoidable quality loss."
-    read -a RATE_RESP -p "Fix PipeWire's sample rate to 44.1kHz? (Y/n) "
-    echo
-    if [ -n "$RATE_RESP" ] && [ "$RATE_RESP" != "y" ] && [ "$RATE_RESP" != "Y" ] ; then
-        echo "Skipped -- PipeWire stays on its dynamic default rate."
+    if [ "$current_fixed" = "1" ] ; then
+        echo "Current setting: fixed at 44.1kHz."
+        read -a RATE_RESP -p "Revert to PipeWire's dynamic default rate instead? (y/N) "
+        echo
+        if [ "$RATE_RESP" == "y" ] || [ "$RATE_RESP" == "Y" ] ; then
+            rm -f /etc/pipewire/pipewire.conf.d/lindon-samplerate.conf
+            echo "Removed -- PipeWire goes back to its dynamic default rate"
+            echo "once rd's session (re)starts."
+            return 0
+        fi
+        echo "Kept -- still fixed at 44.1kHz."
         return 0
+    else
+        echo "Current setting: dynamic (default)."
+        read -a RATE_RESP -p "Fix PipeWire's sample rate to 44.1kHz instead? (Y/n) "
+        echo
+        if [ -n "$RATE_RESP" ] && [ "$RATE_RESP" != "y" ] && [ "$RATE_RESP" != "Y" ] ; then
+            echo "Skipped -- PipeWire stays on its dynamic default rate."
+            return 0
+        fi
     fi
 
     mkdir -p /etc/pipewire/pipewire.conf.d
