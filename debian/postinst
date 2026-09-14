@@ -143,6 +143,18 @@ case "$1" in
 	  mkdir -p /etc/rivendell.d
 	  chmod 775 /etc/rivendell.d
       fi
+      # lindon: capture this BEFORE the block below creates
+      # rd-default.conf, so the fresh-install-vs-upgrade check further
+      # down (search LINDON_HAD_EXISTING_CONFIG) sees whether the file
+      # existed when this postinst run STARTED, not whether it exists
+      # after this same run already created it moments ago -- checking
+      # post-creation made every fresh install take the upgrade branch
+      # (rddbmgr --modify on a database that was never created).
+      if test -e /etc/rivendell.d/rd-default.conf ; then
+          LINDON_HAD_EXISTING_CONFIG=1
+      else
+          LINDON_HAD_EXISTING_CONFIG=0
+      fi
       if test ! -e /etc/rd.conf ; then
 	  cp /usr/share/rivendell/rd.conf-sample /etc/rivendell.d/rd-default.conf
 	  ln -s /etc/rivendell.d/rd-default.conf /etc/rd.conf
@@ -170,7 +182,7 @@ case "$1" in
       # rivolution database and config already exist. Without this check,
       # that first install would hit the branch below and destroy the
       # production database (drop database if exists ...).
-      if test -z "$OLD_VERSION" && test ! -e /etc/rivendell.d/rd-default.conf ; then
+      if test -z "$OLD_VERSION" && test "$LINDON_HAD_EXISTING_CONFIG" = "0" ; then
 	  rd_conf_real=/etc/rivendell.d/rd-default.conf
 
 	  mysql_pass=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32)
