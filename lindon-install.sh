@@ -221,10 +221,13 @@ function InstallPackages {
 # Step 3b: PipeWire sample rate
 #
 # PipeWire defaults to a dynamic rate (usually 48kHz) and resamples on
-# the fly to whatever a client asks for. caed expects a fixed 44.1kHz
-# (broadcast standard) -- left on 48kHz, everything still plays, but
-# via constant on-the-fly resampling: unnecessary quality loss and
-# overhead for no benefit.
+# the fly to whatever a client asks for. caed expects a fixed rate --
+# left dynamic, everything still plays, but via constant on-the-fly
+# resampling: unnecessary quality loss and overhead for no benefit.
+# Which fixed rate to pick depends on the system's own Rivendell sample
+# rate (RDAdmin -> Manage Hosts -> System): 44.1kHz is the classic
+# broadcast-standard default, 48kHz suits a system whose library/import
+# chain already runs at 48kHz throughout.
 #
 # Written now rather than applied live: this deployment always ends
 # with a mandatory reboot (see the closing message), so there's no
@@ -238,48 +241,59 @@ function ConfigureSampleRate {
     # lindon: detect current state so a re-run shows it and Enter just
     # keeps it, instead of asking the same fixed-default question every
     # time regardless of what's already configured.
-    if [ -e /etc/pipewire/pipewire.conf.d/lindon-samplerate.conf ] && \
-       grep -q 'default.clock.rate = 44100' /etc/pipewire/pipewire.conf.d/lindon-samplerate.conf 2>/dev/null ; then
-        current_fixed=1
-    else
-        current_fixed=0
+    current_rate="dynamic"
+    if [ -e /etc/pipewire/pipewire.conf.d/lindon-samplerate.conf ] ; then
+        if grep -q 'default.clock.rate = 44100' /etc/pipewire/pipewire.conf.d/lindon-samplerate.conf 2>/dev/null ; then
+            current_rate="44100"
+        elif grep -q 'default.clock.rate = 48000' /etc/pipewire/pipewire.conf.d/lindon-samplerate.conf 2>/dev/null ; then
+            current_rate="48000"
+        fi
     fi
 
     echo "PipeWire defaults to a dynamic sample rate (usually 48kHz) and"
-    echo "resamples on the fly. caed expects a fixed 44.1kHz -- broadcast"
-    echo "standard -- leaving it on 48kHz means constant resampling"
-    echo "overhead and avoidable quality loss."
-    if [ "$current_fixed" = "1" ] ; then
-        echo "Current setting: fixed at 44.1kHz."
-        read -a RATE_RESP -p "Revert to PipeWire's dynamic default rate instead? (y/N) "
-        echo
-        if [ "$RATE_RESP" == "y" ] || [ "$RATE_RESP" == "Y" ] ; then
-            rm -f /etc/pipewire/pipewire.conf.d/lindon-samplerate.conf
-            echo "Removed -- PipeWire goes back to its dynamic default rate"
-            echo "once rd's session (re)starts."
-            return 0
-        fi
-        echo "Kept -- still fixed at 44.1kHz."
+    echo "resamples on the fly. caed expects a fixed rate -- leaving it"
+    echo "dynamic means constant resampling overhead and avoidable"
+    echo "quality loss. Pick whichever matches this system's Rivendell"
+    echo "sample rate (RDAdmin -> Manage Hosts -> System)."
+    echo "Current setting: $current_rate."
+    echo "  [1] Fix at 44.1kHz"
+    echo "  [2] Fix at 48kHz"
+    echo "  [3] Dynamic default (no fixed rate)"
+    read -a RATE_RESP -p "Choice [current: $current_rate, Enter keeps it]: "
+    echo
+
+    case "$RATE_RESP" in
+        1) new_rate="44100" ;;
+        2) new_rate="48000" ;;
+        3) new_rate="dynamic" ;;
+        "") new_rate="$current_rate" ;;
+        *)
+            echo "Unrecognized choice, keeping current setting ($current_rate)."
+            new_rate="$current_rate"
+            ;;
+    esac
+
+    if [ "$new_rate" = "$current_rate" ] ; then
+        echo "Kept -- still $current_rate."
         return 0
-    else
-        echo "Current setting: dynamic (default)."
-        read -a RATE_RESP -p "Fix PipeWire's sample rate to 44.1kHz instead? (Y/n) "
-        echo
-        if [ -n "$RATE_RESP" ] && [ "$RATE_RESP" != "y" ] && [ "$RATE_RESP" != "Y" ] ; then
-            echo "Skipped -- PipeWire stays on its dynamic default rate."
-            return 0
-        fi
+    fi
+
+    if [ "$new_rate" = "dynamic" ] ; then
+        rm -f /etc/pipewire/pipewire.conf.d/lindon-samplerate.conf
+        echo "Removed -- PipeWire goes back to its dynamic default rate"
+        echo "once rd's session (re)starts."
+        return 0
     fi
 
     mkdir -p /etc/pipewire/pipewire.conf.d
     cat > /etc/pipewire/pipewire.conf.d/lindon-samplerate.conf <<PWCONF
 context.properties = {
-    default.clock.rate = 44100
-    default.clock.allowed-rates = [ 44100 ]
+    default.clock.rate = $new_rate
+    default.clock.allowed-rates = [ $new_rate ]
 }
 PWCONF
-    echo "Written -- takes effect once rd's session (re)starts, i.e. at"
-    echo "the reboot this script asks for below."
+    echo "Written ($new_rate) -- takes effect once rd's session (re)starts,"
+    echo "i.e. at the reboot this script asks for below."
 }
 
 # ---------------------------------------------------------------------
