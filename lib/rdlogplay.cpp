@@ -1529,6 +1529,21 @@ void RDLogPlay::graceTimerData()
   rda->syslog(LOG_DEBUG,"lindon: graceTimerData() fired for line=%d",
 	 play_grace_line);
 
+  //
+  // lindon: the grace line may already have been started normally (segue
+  // from its predecessor) before Playing() stopped the grace timer --
+  // never start it a second time.
+  //
+  RDLogLine *grace_logline=logLine(play_grace_line);
+  if((grace_logline==NULL)||
+     ((grace_logline->status()!=RDLogLine::Scheduled)&&
+      (grace_logline->status()!=RDLogLine::Paused))) {
+    rda->syslog(LOG_DEBUG,
+           "lindon: grace line=%d already started, graceTimerData() ignored",
+           play_grace_line);
+    return;
+  }
+
   if(play_op_mode==RDAirPlayConf::Auto) {
     if(!GetNextPlayable(&line,false)) {
       SetTransTimer();
@@ -3001,6 +3016,21 @@ void RDLogPlay::Stopped(int id)
   emit stopped(line);
   LogTraffic(logLine(line),(RDLogLine::PlaySource)(play_id+1),
 	     RDAirPlayConf::TrafficStop,play_onair_flag);
+  if(play_grace_timer->isActive()) {
+    //
+    // lindon: predecessor stopped, but the grace line is already running
+    // (started by the normal segue before Playing() arrived) -> the
+    // pending hard time is done, cancel the timer instead of waking it.
+    //
+    RDLogLine *gl=logLine(play_grace_line);
+    if((gl!=NULL)&&(gl->status()!=RDLogLine::Scheduled)&&
+       (gl->status()!=RDLogLine::Paused)) {
+      rda->syslog(LOG_DEBUG,
+             "lindon: grace line=%d already started, grace timer cancelled",
+             play_grace_line);
+      play_grace_timer->stop();
+    }
+  }
   if(play_grace_timer->isActive()) {  // Pending Hard Time Event
     rda->syslog(LOG_DEBUG,
 	   "lindon: predecessor Stopped() early, waking grace timer for line=%d",
